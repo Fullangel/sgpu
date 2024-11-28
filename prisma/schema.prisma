@@ -1,0 +1,78 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  Profesor
+  Preparador
+  Estudiante
+}
+
+enum State {
+  Activo
+  Inactivo
+}
+
+model Nationality {
+  id          Int     @id @default(autoincrement())
+  code        String //V o E
+  description String?
+  user        User[] //Relacion de uno a muchos
+}
+
+model User {
+  id               Int              @id @default(autoincrement())
+  name             String
+  username         String           @unique
+  password         String
+  email            String           @unique
+  emailVerified    Boolean
+  type             Role
+  specialization   String
+  status           State
+  content          String?
+  birthdate        DateTime
+  nationality_id   Int //Clave foranea hacia nacionality
+  nationality      Nationality      @relation(fields: [nationality_id], references: [id])
+  names            Name[] //Relacion de uno a muchos
+  direction        Direction[] //Relacion de uno a muchos
+  questions_secret QuestionSecret[]
+  createdAt        DateTime         @default(now())
+  updateAt         DateTime         @updatedAt
+}
+
+model Name {
+  id             Int    @id @default(autoincrement())
+  user_id        Int //Llave foranea hacia user
+  first_name     String
+  last_name      String
+  first_surname  String
+  second_surname String
+  user           User   @relation(fields: [user_id], references: [id])
+}
+
+model Direction {
+  id      Int    @id @default(autoincrement())
+  user_id Int //Llave foranea hacia user
+  address String
+  user    User   @relation(fields: [user_id], references: [id])
+}
+
+model QuestionSecret {
+  id       Int    @id @default(autoincrement())
+  user_id  Int //Llave foranea hacia user
+  question String
+  answer   String
+  user     User   @relation(fields: [user_id], references: [id])
+}
