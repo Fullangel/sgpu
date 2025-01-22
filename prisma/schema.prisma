@@ -50,7 +50,7 @@ model User {
   questions_secret QuestionSecret[]
   cedula           String           @unique
   createdAt        DateTime         @default(now())
-  updateAt         DateTime         @updatedAt
+  updateAt         DateTime?        @updatedAt
 
   @@unique([email], map: "user_email_unique")
   @@map("user")

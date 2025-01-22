@@ -29,41 +29,13 @@ import { Textarea } from "@/components/ui/textarea";
 // import { useState } from "react";
 // import Image from "next/image";
 import Link from "next/link";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 
 export default function RegisterPage() {
-  //   const [formData, setFormData] = useState({
-  //     nombre: "",
-  //     segundoNombre: "",
-  //     primerApellido: "",
-  //     segundoApellido: "",
-  //     cedula: "",
-  //     tipoDocumento: "V",
-  //     carrera: "",
-  //     direccion: "",
-  //     preguntaSecreta: "",
-  //     email: "",
-  //     password: "",
-  //     confirmPassword: "",
-  //   });
-
-  //   const handleSubmit = (e: React.FormEvent) => {
-  //     e.preventDefault();
-  //     // Handle registration logic here
-  //   };
-
-  //   const handleChange = (
-  //     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  //   ) => {
-  //     setFormData({
-  //       ...formData,
-  //       [e.target.name]: e.target.value,
-  //     });
-  //   };
-
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors },
   } = useForm();
 
@@ -82,9 +54,9 @@ export default function RegisterPage() {
           username: data.username,
           email: data.email,
           password: data.password,
-          // first_name: data.first_name,
-          // last_name: data.last_name,
-          second_name: data.first_surname,
+          first_name: data.first_name,
+          last_name: data.last_name,
+          first_surname: data.first_surname,
           second_surname: data.second_surname,
           cedula: data.cedula,
           type: "Student",
@@ -94,15 +66,16 @@ export default function RegisterPage() {
           answer: data.answer,
           nationality: data.nationality,
           birthdate: new Date(data.birthdate).toISOString(),
+          createdAt: new Date(data.createdAt).toISOString(),
         }),
         headers: {
           "Content-Type": "application/json",
         },
       });
 
-      if (!res.ok) {
-        throw new Error(`Error: ${res.status}`);
-      }
+      // if (!res.ok) {
+      //   throw new Error(`Error: ${res.status}`);
+      // }
 
       const resJSON = await res.json();
       console.log(resJSON);
@@ -258,22 +231,25 @@ export default function RegisterPage() {
                     <Label htmlFor="nationality" className="text-white">
                       Nacionalidad
                     </Label>
-                    <Select
-                      {...register("nationality", {
-                        required: {
-                          value: false,
-                          message: "El campo es requerido",
-                        },
-                      })}
-                    >
-                      <SelectTrigger className="bg-white/20 border-white/30 text-white">
-                        <SelectValue placeholder="Selecciona tu nacionalidad" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="V">V</SelectItem>
-                        <SelectItem value="E">E</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <Controller
+                      name="nationality"
+                      control={control}
+                      rules={{ required: "El campo es requerido" }}
+                      render={({ field }) => (
+                        <Select
+                          onValueChange={field.onChange}
+                          value={field.value}
+                        >
+                          <SelectTrigger className="bg-white/20 border-white/30 text-white">
+                            <SelectValue placeholder="Selecciona tu nacionalidad" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="V">venezolano</SelectItem>
+                            <SelectItem value="E">extranjero</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      )}
+                    />
 
                     {errors.nationality && (
                       <span className="text-red-500">

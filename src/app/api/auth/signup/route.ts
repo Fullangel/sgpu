@@ -15,10 +15,10 @@ export async function POST(request: Request) {
         }
 
         const { username, email, password, first_name,
-            last_name, first_surname, second_surname, cedula, type, specialization,
+            last_name, first_surname, second_surname, cedula, createdAt, type, specialization,
             address, question, answer, nationality, birthdate, full_name } = data;
 
-        if (!username || !email || !password || !full_name || !nationality) {
+        if (!username || !email || !password || !full_name || !nationality || !first_name || !last_name || !first_surname || !second_surname) {
             return NextResponse.json(
                 { error: 'Missing required fields' },
                 { status: 400 }
@@ -26,18 +26,55 @@ export async function POST(request: Request) {
         }
 
         // Buscar el nationality_id correspondiente al código (V o E)
-        // const nationalityRecord = await prisma.nationality.findFirst({
-        //     where: { code: nationality },
-        // });
+        console.log("Nationality recibida:", nationality);
+        const nationalityRecord = await prisma.nationality.findFirst({
+            where: { code: nationality },
+        });
 
-        // if (!nationalityRecord) {
-        //     return NextResponse.json(
-        //         { error: 'Invalid nationality' },
-        //         { status: 400 }
-        //     );
-        // }
+        console.log("Nationality encontrada:", nationalityRecord);
 
-        // const nationality_id = nationalityRecord.id;
+        if (!nationalityRecord) {
+            return NextResponse.json(
+                { error: 'Invalid nationality' },
+                { status: 400 }
+            );
+        }
+
+        const nationality_id = nationalityRecord.id;
+
+        console.log("Datos para crear el usuario:", {
+            username,
+            email,
+            password,
+            emailVerified: false,
+            type: type || 'Student',
+            specialization,
+            status: 'Active',
+            cedula,
+            birthdate: new Date(birthdate),
+            nationality_id,
+            name: full_name,
+            names: {
+                create: {
+                    first_name,
+                    last_name,
+                    first_surname: first_surname,
+                    second_surname: second_surname,
+                },
+            },
+            direction: {
+                create: {
+                    address,
+                },
+            },
+            questions_secret: {
+                create: {
+                    question,
+                    answer,
+                },
+            },
+            createdAt: new Date(),
+        });
 
         const newUser = await prisma.user.create({
             data: {
@@ -50,6 +87,7 @@ export async function POST(request: Request) {
                 status: 'Active',
                 cedula,
                 birthdate: new Date(birthdate),
+                nationality_id,
                 nationality,
                 name: full_name,
                 names: {
@@ -71,13 +109,15 @@ export async function POST(request: Request) {
                         answer,
                     },
                 },
+                createdAt: new Date(createdAt),
             },
         });
         console.log(data);
 
         return NextResponse.json(newUser);
     } catch (error) {
-        console.error('Error', error);
+        // console.error('Error', error);
+        console.error('Error al crear el usuario:', error);
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }
 }
