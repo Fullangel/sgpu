@@ -17,7 +17,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+// import { Calendar } from "@/components/ui/calendar";
+// import {
+//   Popover,
+//   PopoverContent,
+//   PopoverTrigger,
+// } from "@/components/ui/popover";
+// import { CalendarIcon } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
+// import { cn } from "@/lib/utils";
 // import { useState } from "react";
 // import Image from "next/image";
 import Link from "next/link";
@@ -59,8 +67,48 @@ export default function RegisterPage() {
     formState: { errors },
   } = useForm();
 
-  const onSubmit = handleSubmit((data) => {
-    console.log(data);
+  const onSubmit = handleSubmit(async (data) => {
+    if (data.password === data.confirmPassword) {
+      return alert("La contrase;a no coincide");
+    }
+
+    console.log("Datos del formulario:", data);
+
+    try {
+      const res = await fetch("/api/auth/signup", {
+        method: "POST",
+        body: JSON.stringify({
+          full_name: `${data.first_name} ${data.last_name}`, // Incluye la propiedad name
+          username: data.username,
+          email: data.email,
+          password: data.password,
+          // first_name: data.first_name,
+          // last_name: data.last_name,
+          second_name: data.first_surname,
+          second_surname: data.second_surname,
+          cedula: data.cedula,
+          type: "Student",
+          specialization: data.specialization,
+          address: data.address,
+          question: data.question,
+          answer: data.answer,
+          nationality: data.nationality,
+          birthdate: new Date(data.birthdate).toISOString(),
+        }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!res.ok) {
+        throw new Error(`Error: ${res.status}`);
+      }
+
+      const resJSON = await res.json();
+      console.log(resJSON);
+    } catch (error) {
+      console.error("Error:", error);
+    }
   });
 
   console.log(errors);
@@ -177,6 +225,27 @@ export default function RegisterPage() {
                     )}
                   </div>
                 </div>
+                <div className="space-y-2">
+                  <Label htmlFor="birthdate" className="text-white">
+                    Fecha de Nacimiento
+                  </Label>
+                  <input
+                    id="birthdate"
+                    type="date"
+                    {...register("birthdate", {
+                      required: {
+                        value: true,
+                        message: "El campo es requerido",
+                      },
+                    })}
+                    className="bg-white/20 border-white/30 text-white placeholder:text-white/70"
+                  />
+                  {errors.birthdate && (
+                    <span className="text-red-500">
+                      {errors.birthdate.message as React.ReactNode}
+                    </span>
+                  )}
+                </div>
               </div>
 
               {/* Document Information */}
@@ -186,19 +255,33 @@ export default function RegisterPage() {
                 </h3>
                 <div className="flex space-x-4">
                   <div className="w-24">
-                    <Label htmlFor="tipoDocumento" className="text-white">
-                      Tipo
+                    <Label htmlFor="nationality" className="text-white">
+                      Nacionalidad
                     </Label>
-                    <Select defaultValue="V">
+                    <Select
+                      {...register("nationality", {
+                        required: {
+                          value: false,
+                          message: "El campo es requerido",
+                        },
+                      })}
+                    >
                       <SelectTrigger className="bg-white/20 border-white/30 text-white">
-                        <SelectValue placeholder="Tipo" />
+                        <SelectValue placeholder="Selecciona tu nacionalidad" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="V">V</SelectItem>
                         <SelectItem value="E">E</SelectItem>
                       </SelectContent>
                     </Select>
+
+                    {errors.nationality && (
+                      <span className="text-red-500">
+                        {errors.nationality.message as React.ReactNode}
+                      </span>
+                    )}
                   </div>
+
                   <div className="flex-1 space-y-2">
                     <Label htmlFor="cedula" className="text-white">
                       Número de Cédula
@@ -291,6 +374,7 @@ export default function RegisterPage() {
                     <Label htmlFor="email" className="text-white">
                       Correo Electrónico
                     </Label>
+
                     <Input
                       id="email"
                       type="email"
@@ -309,6 +393,30 @@ export default function RegisterPage() {
                       </span>
                     )}
                   </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="username" className="text-white">
+                      Username
+                    </Label>
+
+                    <Input
+                      id="username"
+                      type="username"
+                      {...register("username", {
+                        required: {
+                          value: true,
+                          message: "El campo es requerido",
+                        },
+                      })}
+                      className="bg-white/20 border-white/30 text-white placeholder:text-white/70"
+                    />
+
+                    {errors.username && (
+                      <span className="text-red-500">
+                        {errors.username.message as React.ReactNode}
+                      </span>
+                    )}
+                  </div>
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="password" className="text-white">
