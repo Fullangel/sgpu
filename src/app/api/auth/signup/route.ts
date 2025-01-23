@@ -15,7 +15,7 @@ export async function POST(request: Request) {
         }
 
         const { username, email, password, first_name,
-            last_name, first_surname, second_surname, cedula, createdAt, type, specialization,
+            last_name, first_surname, second_surname, cedula, type, specialization,
             address, question, answer, nationality, birthdate, full_name } = data;
 
         if (!username || !email || !password || !full_name || !nationality || !first_name || !last_name || !first_surname || !second_surname) {
@@ -88,7 +88,7 @@ export async function POST(request: Request) {
                 cedula,
                 birthdate: new Date(birthdate),
                 nationality_id,
-                nationality,
+                // nationality,
                 name: full_name,
                 names: {
                     create: {
@@ -109,15 +109,18 @@ export async function POST(request: Request) {
                         answer,
                     },
                 },
-                createdAt: new Date(createdAt),
             },
         });
         console.log(data);
 
         return NextResponse.json(newUser);
     } catch (error) {
-        // console.error('Error', error);
-        console.error('Error al crear el usuario:', error);
-        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+        if (error instanceof Error) {
+            console.error('Error detallado:', error.message);
+            return NextResponse.json({ error: error.message || 'Error interno' }, { status: 500 });
+        } else {
+            console.error('Error desconocido: ', error);
+            return NextResponse.json({ error: 'Error interno' }, { status: 500 });
+        }
     }
 }

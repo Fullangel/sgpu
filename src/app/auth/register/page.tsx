@@ -40,9 +40,9 @@ export default function RegisterPage() {
   } = useForm();
 
   const onSubmit = handleSubmit(async (data) => {
-    if (data.password === data.confirmPassword) {
-      return alert("La contrase;a no coincide");
-    }
+    // if (data.password === data.confirmPassword) {
+    //   return alert("La contrase;a no coincide");
+    // }
 
     console.log("Datos del formulario:", data);
 
@@ -66,16 +66,22 @@ export default function RegisterPage() {
           answer: data.answer,
           nationality: data.nationality,
           birthdate: new Date(data.birthdate).toISOString(),
-          createdAt: new Date(data.createdAt).toISOString(),
         }),
         headers: {
           "Content-Type": "application/json",
         },
       });
 
-      // if (!res.ok) {
-      //   throw new Error(`Error: ${res.status}`);
-      // }
+      if (!res.ok) {
+        const errorText = await res.text(); // 👈 Lee el texto primero
+        try {
+          const errorData = JSON.parse(errorText);
+          alert(errorData.error);
+        } catch {
+          alert(`Error: ${errorText}`);
+        }
+        return;
+      }
 
       const resJSON = await res.json();
       console.log(resJSON);

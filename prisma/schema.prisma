@@ -49,7 +49,7 @@ model User {
   direction        Direction[] //Relacion de uno a muchos
   questions_secret QuestionSecret[]
   cedula           String           @unique
-  createdAt        DateTime         @default(now())
+  createdAt        DateTime?        @default(now())
   updateAt         DateTime?        @updatedAt
 
   @@unique([email], map: "user_email_unique")
