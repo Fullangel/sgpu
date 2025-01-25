@@ -1,36 +1,82 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
-
 ## Getting Started
 
 First, run the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Para el servicio de correo, para que funcione debe seguirse estos pasos:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. Usar MailHog (Recomendado para desarrollo local)
+   Servidor SMTP local que captura todos los emails enviados sin enviarlos realmente.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Pasos:
 
-## Learn More
+Descargar MailHog: https://github.com/mailhog/MailHog/releases
 
-To learn more about Next.js, take a look at the following resources:
+Ejecutarlo (se abre en http://localhost:8025)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Configurar .env:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```
+EMAIL_USER=no-req
+EMAIL_PASSWORD=no-req
+EMAIL_FROM=test@localhost
+EMAIL_HOST=localhost
+EMAIL_PORT=1025
+```
 
-## Deploy on Vercel
+2. Usar Ethereal (Buzón temporal online)
+   Servicio gratuito que provee un buzón temporal.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Pasos:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Crear cuenta temporal en https://ethereal.email/
+
+Configurar .env con las credenciales generadas:
+
+```
+EMAIL_USER=tuusuario@ethereal.email
+EMAIL_PASSWORD=passwordgenerado
+EMAIL_FROM=tuusuario@ethereal.email
+EMAIL_HOST=smtp.ethereal.email
+EMAIL_PORT=587
+```
+
+# En caso de usarse Gmail:
+
+3. Usar Gmail con App Password (Para pruebas reales)
+   Si quieres enviar emails reales temporalmente:
+
+Activar verificación en 2 pasos: https://myaccount.google.com/security
+
+Crear App Password: https://myaccount.google.com/apppasswords
+
+Configurar .env:
+
+```
+EMAIL_USER=tucorreo@gmail.com
+EMAIL_PASSWORD=contraseña_de_aplicación_generada
+EMAIL_FROM=tucorreo@gmail.com
+```
+
+# Guia de variables de entorno:
+
+```
+# Desarrollo Local con MailHog
+EMAIL_HOST=localhost
+EMAIL_PORT=1025
+EMAIL_SECURE=false
+EMAIL_FROM=no-reply@localhost
+# (No necesita usuario/contraseña para MailHog)
+
+# O para Ethereal (generar credenciales en https://ethereal.email):
+# EMAIL_HOST=smtp.ethereal.email
+# EMAIL_PORT=587
+# EMAIL_SECURE=false
+# EMAIL_USER=tuusuario@ethereal.email
+# EMAIL_PASSWORD=passwordgenerado
+# EMAIL_FROM=tuusuario@ethereal.email
+
+```

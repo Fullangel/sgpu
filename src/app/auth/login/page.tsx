@@ -48,11 +48,6 @@ export default function LoginPage() {
     }
   });
 
-  // const handleSubmit = (e: React.FormEvent) => {
-  //   e.preventDefault();
-  //   // Handle login logic here
-  // };
-
   return (
     <div className="min-h-screen flex flex-col lg:flex-row">
       {/* Left Section - Login Form */}
@@ -125,6 +120,15 @@ export default function LoginPage() {
                 Iniciar Sesión
               </Button>
             </form>
+
+            <div className="text-center mt-4">
+              <Link
+                href="/auth/forgot-password"
+                className="text-blue-600 hover:underline text-sm"
+              >
+                ¿Olvidaste tu contraseña?
+              </Link>
+            </div>
 
             <div className="mt-6 text-center">
               <p className="text-white/90 text-sm">

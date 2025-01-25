@@ -25,7 +25,7 @@ export default function Home() {
                 Iniciar Sesión
               </Button>
             </Link>
-            <Link href="/register">
+            <Link href="/auth/register">
               <Button className="bg-white text-blue-600 hover:bg-blue-50">
                 Registrarse
               </Button>

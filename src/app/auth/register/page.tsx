@@ -40,7 +40,10 @@ export default function RegisterPage() {
     try {
       const response = await fetch("/api/auth/signup", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
         body: JSON.stringify({
           ...data,
           full_name: `${data.first_name} ${data.last_name}`,
@@ -51,14 +54,20 @@ export default function RegisterPage() {
         }),
       });
 
+      const responseText = await response.text();
+
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Error en el registro");
+        try {
+          const errorData = JSON.parse(responseText);
+          throw new Error(errorData.error || "Error en el registro");
+        } catch {
+          throw new Error(`Error ${response.status}: ${responseText}`);
+        }
       }
 
-      const result = await response.json();
+      const result = JSON.parse(responseText);
       console.log("Registro exitoso:", result);
-      alert("Registro exitoso!");
+      alert("¡Registro completado con éxito!");
     } catch (error) {
       console.error("Error en registro:", error);
       alert(error instanceof Error ? error.message : "Error desconocido");

@@ -6,8 +6,35 @@ import { createUser } from '@/services/userService';
 
 export async function POST(request: Request) {
     try {
+
+        // Verificar contenido JSON
+        const contentType = request.headers.get('content-type');
+        if (!contentType?.includes('application/json')) {
+            return NextResponse.json(
+                { error: "El contenido debe ser tipo JSON" },
+                { status: 400 }
+            );
+        }
+
         const rawData = await request.json();
+        if (!rawData) {
+            return NextResponse.json(
+                { error: "Cuerpo de solicitud vacío" },
+                { status: 400 }
+            );
+        }
         const parsedData = registerSchema.parse(rawData);
+        const validation = registerSchema.safeParse(parsedData);
+
+        if (!validation.success) {
+            return NextResponse.json(
+                {
+                    error: "Datos inválidos",
+                    details: validation.error.errors
+                },
+                { status: 400 }
+            );
+        }
 
         const existingUser = await prisma.user.findFirst({
             where: {

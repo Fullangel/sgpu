@@ -32,25 +32,27 @@ model Nationality {
 }
 
 model User {
-  id               Int              @id @default(autoincrement())
-  name             String
-  username         String           @unique
-  email            String           @unique
-  password         String
-  emailVerified    Boolean
-  type             Role
-  specialization   String
-  status           State
-  content          String?
-  birthdate        DateTime
-  nationality_id   Int //Clave foranea hacia nacionality
-  nationality      Nationality      @relation(fields: [nationality_id], references: [id])
-  names            Name[] //Relacion de uno a muchos
-  direction        Direction[] //Relacion de uno a muchos
-  questions_secret QuestionSecret[]
-  cedula           String           @unique
-  createdAt        DateTime?        @default(now())
-  updateAt         DateTime?        @updatedAt
+  id                   Int              @id @default(autoincrement())
+  name                 String
+  username             String           @unique
+  email                String           @unique
+  password             String
+  emailVerified        Boolean
+  type                 Role
+  specialization       String
+  status               State
+  content              String?
+  birthdate            DateTime
+  nationality_id       Int //Clave foranea hacia nacionality
+  nationality          Nationality      @relation(fields: [nationality_id], references: [id])
+  names                Name[] //Relacion de uno a muchos
+  direction            Direction[] //Relacion de uno a muchos
+  questions_secret     QuestionSecret[]
+  cedula               String           @unique
+  createdAt            DateTime?        @default(now())
+  updateAt             DateTime?        @updatedAt
+  resetPasswordToken   String?
+  resetPasswordExpires DateTime?
 
   @@unique([email], map: "user_email_unique")
   @@map("user")
