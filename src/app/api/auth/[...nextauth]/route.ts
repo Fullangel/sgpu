@@ -17,7 +17,7 @@ const authOptions = {
                 console.log("Credenciales recibidas:", credentials);
                 console.log("Intentando autenticar:", credentials?.email);
 
-                if (!credentials) {
+                if (!credentials?.email || credentials?.password) {
                     console.log("No se proporcionaron credenciales");
                     return null;
                 }
@@ -40,6 +40,10 @@ const authOptions = {
                 if (!matchPassword) {
                     console.log("Contraseña incorrecta para el usuario:", credentials.email);
                     return null;
+                }
+
+                if (!isValid) {
+                    throw new Error("invalid-password"); // Mantener este formato exacto
                 }
 
                 console.log("Autenticación exitosa para el usuario:", userFound.email);
