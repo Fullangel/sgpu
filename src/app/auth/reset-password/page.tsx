@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+<<<<<<< HEAD
 import { useSearchParams, useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -14,16 +15,32 @@ export default function ResetPassword() {
   const [message, setMessage] = useState("");
   const router = useRouter();
   const token = useSearchParams().get("token");
+=======
+import { useSearchParams } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+
+export default function ResetPasswordPage() {
+  const [code, setCode] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
+  const email = useSearchParams().get("email");
+>>>>>>> 6f7fd1c4257e360cd27bc392a0d83738da5507f7
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+<<<<<<< HEAD
     setMessage("");
+=======
+>>>>>>> 6f7fd1c4257e360cd27bc392a0d83738da5507f7
 
     try {
       const response = await fetch("/api/auth/reset-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+<<<<<<< HEAD
         body: JSON.stringify({ token, newPassword: password }),
       });
 
@@ -37,11 +54,19 @@ export default function ResetPassword() {
       }
     } catch (error) {
       setMessage("Error de conexión");
+=======
+        body: JSON.stringify({ email, code, newPassword }),
+      });
+
+      const data = await response.json();
+      setMessage(data.message || data.error);
+>>>>>>> 6f7fd1c4257e360cd27bc392a0d83738da5507f7
     } finally {
       setLoading(false);
     }
   };
 
+<<<<<<< HEAD
   if (!token) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-600 to-purple-700">
@@ -143,11 +168,46 @@ export default function ResetPassword() {
           </CardContent>
         </Card>
       </motion.div>
+=======
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="max-w-md w-full space-y-4 p-8 bg-white rounded-lg shadow">
+        <h1 className="text-2xl font-bold">Restablecer Contraseña</h1>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label>Código de verificación</label>
+            <Input
+              value={code}
+              onChange={(e) => setCode(e.target.value)}
+              required
+            />
+          </div>
+
+          <div>
+            <label>Nueva Contraseña</label>
+            <Input
+              type="password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              required
+            />
+          </div>
+
+          <Button type="submit" disabled={loading} className="w-full">
+            {loading ? "Procesando..." : "Restablecer"}
+          </Button>
+        </form>
+
+        {message && <p className="text-center text-sm">{message}</p>}
+      </div>
+>>>>>>> 6f7fd1c4257e360cd27bc392a0d83738da5507f7
     </div>
   );
 }
 
 // "use client";
+<<<<<<< HEAD
 // import { useState } from "react";
 // import { useSearchParams } from "next/navigation";
 // import { Input } from "@/components/ui/input";
@@ -158,6 +218,42 @@ export default function ResetPassword() {
 //   const [loading, setLoading] = useState(false);
 //   const [message, setMessage] = useState("");
 //   const token = useSearchParams().get("token");
+=======
+// import { useState, useEffect } from "react";
+// import { useSearchParams } from "next/navigation";
+// import { Button } from "@/components/ui/button";
+// import { Input } from "@/components/ui/input";
+
+// export default function ResetPasswordPage() {
+//   const [password, setPassword] = useState("");
+//   const [answer, setAnswer] = useState("");
+//   const [loading, setLoading] = useState(false);
+//   const [message, setMessage] = useState("");
+//   const [question, setQuestion] = useState("");
+//   const searchParams = useSearchParams();
+//   const token = searchParams.get("token");
+
+//   useEffect(() => {
+//     const fetchQuestion = async () => {
+//       try {
+//         const response = await fetch(
+//           `/api/auth/forgot-password?token=${token}`
+//         );
+//         const data = await response.json();
+
+//         if (response.ok) {
+//           setQuestion(data.question);
+//         } else {
+//           setMessage(data.error || "Token inválido");
+//         }
+//       } catch (error) {
+//         setMessage("Error de conexión");
+//       }
+//     };
+
+//     if (token) fetchQuestion();
+//   }, [token]);
+>>>>>>> 6f7fd1c4257e360cd27bc392a0d83738da5507f7
 
 //   const handleSubmit = async (e: React.FormEvent) => {
 //     e.preventDefault();
@@ -167,22 +263,36 @@ export default function ResetPassword() {
 //       const response = await fetch("/api/auth/reset-password", {
 //         method: "POST",
 //         headers: { "Content-Type": "application/json" },
+<<<<<<< HEAD
 //         body: JSON.stringify({ token, newPassword: password }),
+=======
+//         body: JSON.stringify({ token, password, answer }),
+>>>>>>> 6f7fd1c4257e360cd27bc392a0d83738da5507f7
 //       });
 
 //       const data = await response.json();
 
 //       if (response.ok) {
+<<<<<<< HEAD
 //         setMessage("¡Contraseña actualizada! Redirigiendo...");
 //         setTimeout(() => (window.location.href = "/auth/login"), 2000);
 //       } else {
 //         setMessage(data.error || "Error al actualizar");
 //       }
+=======
+//         setMessage("Contraseña actualizada exitosamente");
+//       } else {
+//         setMessage(data.error || "Error al actualizar la contraseña");
+//       }
+//     } catch (error) {
+//       setMessage("Error de conexión");
+>>>>>>> 6f7fd1c4257e360cd27bc392a0d83738da5507f7
 //     } finally {
 //       setLoading(false);
 //     }
 //   };
 
+<<<<<<< HEAD
 //   if (!token) return <div className="text-center p-8">Token inválido</div>;
 
 //   return (
@@ -205,6 +315,57 @@ export default function ResetPassword() {
 //         </form>
 
 //         {message && <p className="text-center text-sm">{message}</p>}
+=======
+//   if (!token) return <div className="text-center p-8">Token no válido</div>;
+
+//   return (
+//     <div className="min-h-screen flex items-center justify-center bg-gray-50">
+//       <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-lg shadow-lg">
+//         <h1 className="text-2xl font-bold text-center">
+//           Restablecer Contraseña
+//         </h1>
+
+//         {question && (
+//           <form onSubmit={handleSubmit} className="space-y-6">
+//             <div>
+//               <label className="block text-sm font-medium text-gray-700">
+//                 {question}
+//               </label>
+//               <Input
+//                 value={answer}
+//                 onChange={(e) => setAnswer(e.target.value)}
+//                 required
+//                 className="mt-1"
+//               />
+//             </div>
+
+//             <div>
+//               <label className="block text-sm font-medium text-gray-700">
+//                 Nueva Contraseña
+//               </label>
+//               <Input
+//                 type="password"
+//                 value={password}
+//                 onChange={(e) => setPassword(e.target.value)}
+//                 required
+//                 className="mt-1"
+//               />
+//             </div>
+
+//             <Button
+//               type="submit"
+//               disabled={loading}
+//               className="w-full bg-blue-600 hover:bg-blue-700"
+//             >
+//               {loading ? "Actualizando..." : "Actualizar Contraseña"}
+//             </Button>
+
+//             {message && (
+//               <p className="text-center text-sm text-red-600">{message}</p>
+//             )}
+//           </form>
+//         )}
+>>>>>>> 6f7fd1c4257e360cd27bc392a0d83738da5507f7
 //       </div>
 //     </div>
 //   );

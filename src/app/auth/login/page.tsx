@@ -180,7 +180,22 @@ export default function LoginPage() {
                 )}
               </Button>
 
+<<<<<<< HEAD
               <div className="text-center space-y-4 mt-6">
+=======
+            <div className="text-center mt-4">
+              <Link
+                href="/auth/forgot-password"
+                className="text-blue-600 hover:underline text-sm"
+              >
+                ¿Olvidaste tu contraseña?
+              </Link>
+            </div>
+
+            <div className="mt-6 text-center">
+              <p className="text-white/90 text-sm">
+                ¿No está registrado?{" "}
+>>>>>>> 6f7fd1c4257e360cd27bc392a0d83738da5507f7
                 <Link
                   href="/auth/forgot-password"
                   className="text-sm text-white/70 hover:text-white/90 underline transition-colors"

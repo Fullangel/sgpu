@@ -40,7 +40,10 @@ export default function RegisterPage() {
     try {
       const response = await fetch("/api/auth/signup", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
         body: JSON.stringify({
           ...data,
           full_name: `${data.first_name} ${data.last_name}`,
@@ -51,12 +54,24 @@ export default function RegisterPage() {
         }),
       });
 
+      const responseText = await response.text();
+
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Error en el registro");
+        try {
+          const errorData = JSON.parse(responseText);
+          throw new Error(errorData.error || "Error en el registro");
+        } catch {
+          throw new Error(`Error ${response.status}: ${responseText}`);
+        }
       }
 
+<<<<<<< HEAD
       router.push("/auth/verify-email");
+=======
+      const result = JSON.parse(responseText);
+      console.log("Registro exitoso:", result);
+      alert("¡Registro completado con éxito!");
+>>>>>>> 6f7fd1c4257e360cd27bc392a0d83738da5507f7
     } catch (error) {
       console.error("Error en registro:", error);
       setError(error instanceof Error ? error.message : "Error desconocido");
