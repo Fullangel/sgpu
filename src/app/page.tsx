@@ -110,11 +110,7 @@ export default function Home() {
               </Button>
             </Link>
             <Link href="/auth/register">
-<<<<<<< HEAD
               <Button className="bg-white text-blue-600 hover:bg-blue-50 hover:shadow-lg hover:-translate-y-0.5 transition-transform">
-=======
-              <Button className="bg-white text-blue-600 hover:bg-blue-50">
->>>>>>> 6f7fd1c4257e360cd27bc392a0d83738da5507f7
                 Registrarse
               </Button>
             </Link>
