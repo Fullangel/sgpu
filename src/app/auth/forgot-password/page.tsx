@@ -1,5 +1,4 @@
 "use client";
-<<<<<<< HEAD
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
@@ -15,69 +14,35 @@ export default function ForgotPassword() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const router = useRouter();
-=======
-
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import Link from "next/link";
-
-export default function ForgotPasswordPage() {
-  const [email, setEmail] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
->>>>>>> 6f7fd1c4257e360cd27bc392a0d83738da5507f7
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-<<<<<<< HEAD
     setMessage("");
-=======
-
-    if (!email) {
-      setMessage("Por favor ingrese su email");
-      return;
-    }
->>>>>>> 6f7fd1c4257e360cd27bc392a0d83738da5507f7
 
     try {
       const response = await fetch("/api/auth/forgot-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-<<<<<<< HEAD
         body: JSON.stringify({ email }),
-=======
-        body: JSON.stringify({ email: "usuario@ejemplo.com" }), // <- Asegurar este formato
->>>>>>> 6f7fd1c4257e360cd27bc392a0d83738da5507f7
       });
 
       const data = await response.json();
 
-<<<<<<< HEAD
       if (response.ok) {
         setMessage("Se ha enviado un enlace de recuperación a tu correo");
         setTimeout(() => router.push("/auth/login"), 3000);
-=======
-      if (!response.ok) {
-        setMessage("Se ha enviado un correo con las instrucciones");
->>>>>>> 6f7fd1c4257e360cd27bc392a0d83738da5507f7
       } else {
         setMessage(data.error || "Error al procesar la solicitud");
       }
     } catch (error) {
-<<<<<<< HEAD
       setMessage("Error de conexión con el servidor");
-=======
-      setMessage("Error de conexion");
->>>>>>> 6f7fd1c4257e360cd27bc392a0d83738da5507f7
     } finally {
       setLoading(false);
     }
   };
 
   return (
-<<<<<<< HEAD
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-600 to-purple-700 p-4">
       <motion.div
         initial={{ opacity: 0, x: -50 }}
@@ -177,112 +142,3 @@ export default function ForgotPasswordPage() {
     </div>
   );
 }
-
-// "use client";
-// import { useState } from "react";
-// import { Input } from "@/components/ui/input";
-// import { Button } from "@/components/ui/button";
-// import Link from "next/link";
-
-// export default function ForgotPassword() {
-//   const [email, setEmail] = useState("");
-//   const [loading, setLoading] = useState(false);
-//   const [message, setMessage] = useState("");
-
-//   const handleSubmit = async (e: React.FormEvent) => {
-//     e.preventDefault();
-//     setLoading(true);
-
-//     try {
-//       const response = await fetch("/api/auth/forgot-password", {
-//         method: "POST",
-//         headers: { "Content-Type": "application/json" },
-//         body: JSON.stringify({ email }),
-//       });
-
-//       const data = await response.json();
-
-//       if (response.ok) {
-//         setMessage(
-//           "Revisa tu consola para el enlace de recuperación (solo desarrollo)"
-//         );
-//       } else {
-//         setMessage(data.error || "Error al procesar la solicitud");
-//       }
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   return (
-//     <div className="min-h-screen flex items-center justify-center p-4">
-//       <div className="w-full max-w-md space-y-4">
-//         <h1 className="text-2xl font-bold">Recuperar Contraseña</h1>
-
-//         <form onSubmit={handleSubmit} className="space-y-4">
-//           <Input
-//             type="email"
-//             placeholder="Tu correo electrónico"
-//             value={email}
-//             onChange={(e) => setEmail(e.target.value)}
-//             required
-//           />
-
-//           <Button type="submit" disabled={loading} className="w-full">
-//             {loading ? "Enviando..." : "Enviar Instrucciones"}
-//           </Button>
-//         </form>
-
-//         {message && <p className="text-center text-sm">{message}</p>}
-
-//         <div className="text-center">
-//           <Link href="/auth/login" className="text-blue-600 hover:underline">
-//             Volver al Login
-//           </Link>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// }
-=======
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-lg shadow-lg">
-        <h1 className="text-2xl font-bold text-center">Recuperar Contraseña</h1>
-
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Correo Electrónico
-            </label>
-            <Input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="mt-1"
-            />
-          </div>
-
-          <Button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-blue-600 hover:bg-blue-700"
-          >
-            {loading ? "Enviando..." : "Enviar Instrucciones"}
-          </Button>
-
-          {message && (
-            <p className="text-center text-sm text-red-600">{message}</p>
-          )}
-        </form>
-
-        <div className="text-center mt-4">
-          <Link href="/auth/login" className="text-blue-600 hover:underline">
-            Volver al Login
-          </Link>
-        </div>
-      </div>
-    </div>
-  );
-}
->>>>>>> 6f7fd1c4257e360cd27bc392a0d83738da5507f7

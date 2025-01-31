@@ -32,29 +32,6 @@ model Nationality {
 }
 
 model User {
-<<<<<<< HEAD
-  id                Int              @id @default(autoincrement())
-  name              String
-  username          String           @unique
-  email             String           @unique
-  password          String
-  emailVerified     Boolean
-  type              Role
-  specialization    String
-  status            State
-  content           String?
-  birthdate         DateTime
-  nationality_id    Int //Clave foranea hacia nacionality
-  nationality       Nationality      @relation(fields: [nationality_id], references: [id])
-  names             Name[] //Relacion de uno a muchos
-  direction         Direction[] //Relacion de uno a muchos
-  questions_secret  QuestionSecret[]
-  cedula            String           @unique
-  createdAt         DateTime?        @default(now())
-  updateAt          DateTime?        @updatedAt
-  resetToken        String?          @unique
-  resetTokenExpires DateTime?
-=======
   id                   Int              @id @default(autoincrement())
   name                 String
   username             String           @unique
@@ -76,7 +53,6 @@ model User {
   updateAt             DateTime?        @updatedAt
   resetPasswordToken   String?
   resetPasswordExpires DateTime?
->>>>>>> 6f7fd1c4257e360cd27bc392a0d83738da5507f7
 
   @@unique([email], map: "user_email_unique")
   @@map("user")
