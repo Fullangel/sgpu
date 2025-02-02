@@ -14,9 +14,10 @@ datasource db {
 }
 
 enum Role {
-  Teacher
-  Preparer
-  Student
+  Teacher  @map("Profesor")
+  Preparer @map("Preparador")
+  Student  @map("Estudiante")
+  Admin    @map("Administrador")
 }
 
 enum State {

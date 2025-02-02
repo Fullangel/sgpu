@@ -1,4 +1,5 @@
 import { PrismaClient } from "@prisma/client";
+// import { Special_Elite } from "next/font/google";
 
 const globalForPrisma = global as unknown as { prisma: PrismaClient };
 

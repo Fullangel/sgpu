@@ -1,69 +1,217 @@
-import NextAuth from 'next-auth';
+import NextAuth, { type AuthOptions, type Session, type User } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcrypt';
+import type { JWT } from 'next-auth/jwt';
 
+// Definir tipos extendidos
+declare module 'next-auth' {
+    interface Session {
+        user: {
+            id?: string;
+            role?: string;
+            cedula?: string;
+            nationality?: string;
+        } & DefaultSession['user'];
+    }
 
-const authOptions = {
+    interface User {
+        role?: string;
+        cedula?: string;
+        nationality?: string;
+    }
+}
+
+declare module 'next-auth/jwt' {
+    interface JWT {
+        role?: string;
+        cedula?: string;
+        nationality?: string;
+    }
+}
+
+const authOptions: AuthOptions = {
     providers: [
         CredentialsProvider({
             name: "Credentials",
             credentials: {
-                email: { label: "email", type: "text", placeholder: "Email" },
-                password: { label: "password", type: "password" }
+                email: { label: "Email", type: "text" },
+                password: { label: "Password", type: "password" }
             },
-            async authorize(credentials) {
-
-                console.log("Credenciales recibidas:", credentials);
-                console.log("Intentando autenticar:", credentials?.email);
-
-                if (!credentials?.email || credentials?.password) {
-                    console.log("No se proporcionaron credenciales");
-                    return null;
-                }
-
-                const userFound = await prisma.user.findUnique({
-                    where: {
-                        email: credentials.email
+            async authorize(credentials): Promise<User | null> {
+                try {
+                    if (!credentials?.email || !credentials.password) {
+                        throw new Error('Credenciales incompletas');
                     }
-                })
 
-                if (!userFound) {
-                    console.log("Usuario no encontrado:", credentials.email);
+                    const userFound = await prisma.user.findUnique({
+                        where: { email: credentials.email },
+                        include: { nationality: true }
+                    });
+
+                    if (!userFound) {
+                        throw new Error('Usuario no encontrado');
+                    }
+
+                    if (userFound.status !== 'Active') {
+                        throw new Error('Cuenta inactiva');
+                    }
+
+                    const passwordValid = await bcrypt.compare(
+                        credentials.password,
+                        userFound.password
+                    );
+
+                    if (!passwordValid) {
+                        throw new Error('Contraseña incorrecta');
+                    }
+
+                    return {
+                        id: userFound.id.toString(),
+                        name: userFound.username,
+                        email: userFound.email,
+                        role: userFound.type,
+                        cedula: userFound.cedula,
+                        nationality: userFound.nationality?.code
+                    };
+
+                } catch (error) {
+                    console.error("Error en autenticación:", error);
                     return null;
                 }
-
-                const matchPassword = await bcrypt.compare(credentials.password, userFound.password)
-
-                console.log(matchPassword);
-
-                if (!matchPassword) {
-                    console.log("Contraseña incorrecta para el usuario:", credentials.email);
-                    return null;
-                }
-
-                if (!isValid) {
-                    throw new Error("invalid-password"); // Mantener este formato exacto
-                }
-
-                console.log("Autenticación exitosa para el usuario:", userFound.email);
-
-                return {
-                    id: userFound.id,
-                    name: userFound.username,
-                    email: userFound.email
-                }
-
             },
         }),
     ],
+    callbacks: {
+        async jwt({ token, user }: { token: JWT; user?: User }): Promise<JWT> {
+            if (user) {
+                token.id = user.id;
+                token.role = user.role;
+                token.cedula = user.cedula;
+                token.nationality = user.nationality;
+            }
+            return token;
+        },
+        async session({ session, token }: { session: Session; token: JWT }): Promise<Session> {
+            if (token) {
+                session.user.id = token.id;
+                session.user.role = token.role;
+                session.user.cedula = token.cedula;
+                session.user.nationality = token.nationality;
+            }
+            return session;
+        }
+    },
     secret: process.env.NEXTAUTH_SECRET,
     pages: {
         signIn: "/auth/login",
+        error: "/auth/error"
+    },
+    session: {
+        strategy: "jwt" as const,
+        maxAge: 24 * 60 * 60 // 24 horas
     }
-}
+};
 
-console.log("NEXTAUTH_SECRET:", process.env.NEXTAUTH_SECRET);
 const handler = NextAuth(authOptions);
+export { handler as GET, handler as POST };
 
-export { handler as GET, handler as POST }
+// import NextAuth from 'next-auth';
+// import CredentialsProvider from 'next-auth/providers/credentials';
+// import { prisma } from '@/lib/prisma';
+// import bcrypt from 'bcrypt';
+
+
+// const authOptions = {
+//     providers: [
+//         CredentialsProvider({
+//             name: "Credentials",
+//             credentials: {
+//                 email: { label: "email", type: "text", placeholder: "Email" },
+//                 password: { label: "password", type: "password" }
+//             },
+//             async authorize(credentials) {
+
+//                 console.log("Credenciales recibidas:", credentials);
+//                 console.log("Intentando autenticar:", credentials?.email);
+
+//                 if (!credentials?.email || credentials?.password) {
+//                     console.log("Credenciales incompletas");
+//                     return null;
+//                 }
+
+//                 try {
+//                     const userFound = await prisma.user.findUnique({
+//                         where: {
+//                             email: credentials.email
+//                         }
+//                     })
+
+//                     if (!userFound) {
+//                         console.log("Usuario no encontrado:", credentials.email);
+//                         return null;
+//                     }
+
+//                     // Verificar estado del usuario
+//                     if (userFound.status !== 'Active') {
+//                         console.log("Cuenta inactiva");
+//                         return null;
+//                     }
+
+//                     const matchPassword = await bcrypt.compare(credentials.password, userFound.password)
+
+//                     console.log(matchPassword);
+
+//                     if (!matchPassword) {
+//                         console.log("Contraseña incorrecta para el usuario:", credentials.email);
+//                         return null;
+//                     }
+
+//                     // Retornar objeto de usuario para la sesión
+//                     return {
+//                         id: userFound.id.toString(),
+//                         name: userFound.username,
+//                         email: userFound.email,
+//                         role: userFound.type, // Usar el campo correcto de tu schema
+//                         cedula: userFound.cedula,
+//                         nationality: userFound.nationality?.code
+//                     };
+//                 } catch (error) {
+//                     console.error("Error en autenticación:", error);
+//                     return null;
+//                 }
+//             },
+//         }),
+//     ],
+//     callbacks: {
+//         async jwt({ token, user }) {
+//             if (user) {
+//                 token.role = user.role;
+//                 token.cedula = user.cedula;
+//                 token.nationality = user.nationality;
+//             }
+//             return token;
+//         },
+//         async session({ session, token }) {
+//             session.user.role = token.role;
+//             session.user.cedula = token.cedula;
+//             session.user.nationality = token.nationality;
+//             return session;
+//         }
+//     },
+//     secret: process.env.NEXTAUTH_SECRET,
+//     pages: {
+//         signIn: "/auth/login",
+//         error: "/auth/error"
+//     },
+//     session: {
+//         strategy: "jwt",
+//         maxAge: 24 * 60 * 60 // 24 horas
+//     }
+// };
+
+
+// console.log("NEXTAUTH_SECRET:", process.env.NEXTAUTH_SECRET);
+// const handler = NextAuth(authOptions);
+
+// export { handler as GET, handler as POST }
