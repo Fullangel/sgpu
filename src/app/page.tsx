@@ -13,6 +13,7 @@ import { BookOpen, Users, Clock, TrendingUp, ChevronDown } from "lucide-react";
 import { useRef, useState } from "react";
 import Particles from "../components/Particles";
 import { useInView } from "react-intersection-observer";
+import { useEffect } from "react";
 
 const stats = [
   {
@@ -50,6 +51,17 @@ export default function Home() {
     triggerOnce: true,
   });
   const [activeTab, setActiveTab] = useState(0);
+
+  useEffect(() => {
+    fetch("/api/auth/create-admin")
+      .then((response) => response.json())
+      .then((data) => {
+        console.log(data.message);
+      })
+      .catch((error) => {
+        console.error("Error al verificar administrador", error);
+      });
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-900 via-indigo-900 to-purple-900 relative overflow-hidden">

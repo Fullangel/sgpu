@@ -1,20 +1,25 @@
-import { hash, compare } from 'bcrypt';
+import { hash } from 'bcrypt';
 import { prisma } from './prisma';
 import dotenv from 'dotenv';
-
 dotenv.config();
 
 export async function createAdminUser() {
-    const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@universidad.com';
-    const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'SecurePassword123!';
+    try {
+        const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@universidad.com';
+        const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'SecurePassword123!';
+        const hashedPassword = await hash(ADMIN_PASSWORD, 12);
 
-    const hashedPassword = await hash(ADMIN_PASSWORD, 12);
+        console.log("Verificando si existe un administrador...");
+        const adminExists = await prisma.user.findFirst({
+            where: { type: 'Admin' }
+        });
 
-    const adminExists = await prisma.user.findFirst({
-        where: { type: 'Admin' }
-    });
+        if (adminExists) {
+            console.log("El usuario administrador ya existe:", adminExists.email);
+            return;
+        }
 
-    if (!adminExists) {
+        console.log("Creando nuevo usuario administrador...");
         await prisma.user.create({
             data: {
                 name: "Administrador del Sistema",
@@ -23,7 +28,7 @@ export async function createAdminUser() {
                 password: hashedPassword,
                 type: "Admin",
                 cedula: "00000000",
-                emailVerified: true,
+                emailVerified: false,
                 specialization: "Administración",
                 status: "Active",
                 birthdate: new Date("1980-01-01"),
@@ -48,8 +53,10 @@ export async function createAdminUser() {
                 }
             }
         });
+
         console.log('✅ Administrador creado exitosamente');
-    } else {
-        console.log('El usuario administrador ya existe');
+    } catch (error) {
+        console.error("Error en createAdminUser:", error?.message || error);
+        throw new Error(error?.message || "Error desconocido al crear administrador");
     }
 }

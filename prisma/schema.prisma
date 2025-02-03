@@ -27,7 +27,7 @@ enum State {
 
 model Nationality {
   id          Int     @id @default(autoincrement())
-  code        String //V o E
+  code        String  @unique //V o E 
   description String?
   user        User[] //Relacion de uno a muchos
 }
