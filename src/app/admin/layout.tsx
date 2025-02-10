@@ -24,10 +24,11 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
-  { icon: Users, label: "Preparadores", href: "/dashboard/preparadores" },
-  { icon: BookOpen, label: "Materias", href: "/dashboard/materias" },
-  { icon: GraduationCap, label: "Estudiantes", href: "/dashboard/estudiantes" },
+  { icon: LayoutDashboard, label: "Dashboard", href: "/admin" },
+  { icon: Users, label: "Profesores", href: "/admin/teachers" },
+  { icon: BookOpen, label: "Materias", href: "/admin/materias" },
+  { icon: Users, label: "Preparadores", href: "/admin/preparadores" },
+  { icon: GraduationCap, label: "Estudiantes", href: "/admin/estudiantes" },
 ];
 
 export default function DashboardLayout({

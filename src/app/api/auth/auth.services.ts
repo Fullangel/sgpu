@@ -1,4 +1,4 @@
-import { compare, hash } from 'bcrypt';
+import { compare } from 'bcryptjs';
 import { prisma } from '@/lib/prisma';
 import { AuthUser } from '@/lib/schemas/types';
 

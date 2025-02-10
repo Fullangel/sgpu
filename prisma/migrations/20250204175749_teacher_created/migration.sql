@@ -1,0 +1,5 @@
+-- AlterTable
+ALTER TABLE `user` MODIFY `emailVerified` BOOLEAN NULL DEFAULT false,
+    MODIFY `specialization` VARCHAR(191) NOT NULL DEFAULT 'Sin especializacion',
+    MODIFY `birthdate` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    MODIFY `cedula` VARCHAR(191) NOT NULL DEFAULT '00000000';

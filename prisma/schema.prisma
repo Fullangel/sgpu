@@ -38,22 +38,27 @@ model User {
   username             String           @unique
   email                String           @unique
   password             String
-  emailVerified        Boolean
+  emailVerified        Boolean?         @default(false)
   type                 Role
-  specialization       String
+  specialization       String           @default("Sin especializacion")
   status               State
   content              String?
-  birthdate            DateTime
+  birthdate            DateTime         @default(dbgenerated("CURRENT_TIMESTAMP"))
   nationality_id       Int //Clave foranea hacia nacionality
   nationality          Nationality      @relation(fields: [nationality_id], references: [id])
   names                Name[] //Relacion de uno a muchos
   direction            Direction[] //Relacion de uno a muchos
   questions_secret     QuestionSecret[]
-  cedula               String           @unique
+  cedula               String           @unique @default("00000000")
   createdAt            DateTime?        @default(now())
   updateAt             DateTime?        @updatedAt
   resetPasswordToken   String?
   resetPasswordExpires DateTime?
+
+  teacher_id Int?
+  teacher    User? @relation("Teacher", fields: [teacher_id], references: [id], onDelete: Cascade)
+
+  preparers User[] @relation("Teacher")
 
   @@unique([email], map: "user_email_unique")
   @@map("user")
