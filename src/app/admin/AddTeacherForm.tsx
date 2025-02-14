@@ -33,7 +33,7 @@ interface FormData {
   username: string;
   nationality_id: "V" | "E";
   address: string;
-  specialization: string;
+  subjectName: string;
 }
 
 export default function AddTeacherForm({
@@ -56,7 +56,7 @@ export default function AddTeacherForm({
       const teacherData = {
         ...data,
         name: `${data.firstName} ${data.firstLastName}`,
-        subject: data.specialization,
+        subject: data.subjectName,
       };
 
       const response = await fetch("/api/teachers/create-teacher", {
@@ -221,16 +221,14 @@ export default function AddTeacherForm({
           )}
         </div>
         <div className="space-y-2">
-          <Label htmlFor="specialization">Especialización</Label>
+          <Label htmlFor="subjectName">Nombre de la Materia</Label>
           <Input
-            id="specialization"
-            {...register("specialization")}
+            id="subjectName"
+            {...register("subjectName")}
             className="w-full"
           />
-          {errors.specialization && (
-            <p className="text-red-500 text-sm">
-              {errors.specialization.message}
-            </p>
+          {errors.subjectName && (
+            <p className="text-red-500 text-sm">{errors.subjectName.message}</p>
           )}
         </div>
         <div className="flex justify-end space-x-2">

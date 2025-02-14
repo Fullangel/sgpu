@@ -12,7 +12,7 @@ const teacherSchema = z.object({
     password: z.string().min(8, "La contraseña debe tener al menos 8 caracteres"),
     nationality_id: z.enum(["V", "E"]),
     address: z.string().min(5, "La dirección es requerida"),
-    specialization: z.string().min(2, "La especialización es requerida"),
+    subjectName: z.string().min(2, "La especialización es requerida"),
 });
 
 export async function POST(request: Request) {
@@ -26,7 +26,9 @@ export async function POST(request: Request) {
             id: newTeacher.id,
             name: newTeacher.name,
             email: newTeacher.email,
-            specialization: newTeacher.specialization,
+            subjectName: typeof newTeacher.subject === "object" && newTeacher.subject !== null
+                ? newTeacher.subject.name || "Sin asignar"
+                : "Sin asignar",
             createdAt: newTeacher.createdAt ? newTeacher.createdAt.toISOString() : null, // Convertir Date a string
         };
 

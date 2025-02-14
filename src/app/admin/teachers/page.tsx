@@ -50,19 +50,13 @@ export default function TeachersPage() {
       }
 
       const newTeacher = await response.json();
-      // const newTeacher = {
-      //   id: Date.now(),
-      //   name: teacher.name,
-      //   subject: teacher.subject,
-      //   tutors: 0,
-      // };
 
       setProfessors((prevProfessors) => [
         ...prevProfessors,
         {
           id: newTeacher.id,
           name: newTeacher.name,
-          subject: newTeacher.specialization,
+          subject: newTeacher.subjectName,
           tutors: 0,
         },
       ]);

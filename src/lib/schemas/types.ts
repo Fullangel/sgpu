@@ -2,7 +2,7 @@
 import {
     type User,
     type Role,
-    type State,
+    type Status,
     type Nationality, // Importación añadida
     type Name,        // Importación añadida
     type Direction    // Importación añadida

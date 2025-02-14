@@ -5,14 +5,22 @@ export async function GET() {
     try {
         const teachers = await prisma.user.findMany({
             where: { type: "Teacher" },
-            select: {
-                id: true,
-                name: true,
-                specialization: true,
-                preparers: {
-                    select: { id: true, name: true },
-                },
+            include: {
+                subject: true,
+                preparers: true,
             },
+            // select: {
+            //     id: true,
+            //     name: true,
+            //     subject: {
+            //         select: {
+            //             name: true,
+            //         },
+            //     },
+            //     preparers: {
+            //         select: { id: true, name: true },
+            //     },
+            // },
         });
 
         console.log(teachers);
@@ -20,7 +28,7 @@ export async function GET() {
         const formattedTeachers = teachers.map((teacher) => ({
             id: teacher.id,
             name: teacher.name,
-            subject: teacher.specialization,
+            subject: teacher.subject?.name || "sin asignar",
             preparers: teacher.preparers.length,
         }));
 

@@ -31,7 +31,7 @@ export async function createAdminUser() {
                 type: "Admin",
                 cedula: "00000000",
                 emailVerified: false,
-                specialization: "Administración",
+                // subjectName: "Administración",
                 status: "Active",
                 birthdate: new Date("1980-01-01"),
                 nationality: {
@@ -84,28 +84,37 @@ export async function createAdminUser() {
 
 // type TeacherData = z.infer<typeof teacherSchema>;
 
+interface CreateTeacherResponse {
+    id: number;
+    name: string;
+    email: string;
+    subject: {
+        id: number;
+        name: string;
+    } | null; // `subject` puede ser `null` si no hay una materia asignada
+    createdAt: Date;
+}
+
 export async function createTeacher(data: {
-    name?: string;
+    // name?: string;
     firstName: string;
     firstLastName: string;
     email: string;
     password: string;
     nationality_id: "V" | "E";
     address: string;
-    specialization: string;
+    subjectName: string;
     secondName?: string | undefined;
     secondLastName?: string | undefined;
     cedula?: string | undefined;
-}) {
+}): Promise<CreateTeacherResponse> {
     try {
-        // Validar los datos del formulario
-        // const validatedData = teacherSchema.parse(data);
         const hashedPassword = await bcrypt.hash(data.password, 12);
 
         // Crear el usuario en la base de datos
-        const newTeacher = await prisma.user.create({
+        const newUser = await prisma.user.create({
             data: {
-                name: data.name || `${data.firstName} ${data.firstLastName}`,
+                name: `${data.firstName} ${data.firstLastName}`,
                 username: `${data.firstName.toLowerCase().replace(/\s+/g, "")}-${Math.floor(
                     Math.random() * 1000
                 )}`,
@@ -114,7 +123,6 @@ export async function createTeacher(data: {
                 type: "Teacher",
                 status: "Active",
                 emailVerified: false,
-                specialization: data.specialization,
                 birthdate: new Date("1980-01-01"),
                 cedula: data.cedula || "0000000", // Valor predeterminado si no se proporciona
                 nationality: {
@@ -143,14 +151,26 @@ export async function createTeacher(data: {
             },
         });
 
-        console.log("✅ Profesor creado exitosamente");
+        //Creacion de la materia asociada al profesor
+        const newSubject = await prisma.subject.create({
+            data: {
+                name: data.subjectName,
+                teacher: {
+                    connect: {
+                        id: newUser.id,  //conectar la materia al profesor recien creado
+                    },
+                },
+            },
+        });
+
+        console.log("✅ Profesor y materia creados exitosamente");
 
         return {
-            id: newTeacher.id,
-            name: newTeacher.name,
-            email: newTeacher.email,
-            specialization: newTeacher.specialization,
-            createdAt: newTeacher.createdAt,
+            id: newUser.id,
+            name: newUser.name,
+            email: newUser.email,
+            subject: { id: newSubject.id, name: newSubject.name },
+            createdAt: new Date(),
         };
 
     } catch (error) {

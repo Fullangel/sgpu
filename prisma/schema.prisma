@@ -40,25 +40,26 @@ model User {
   password             String
   emailVerified        Boolean?         @default(false)
   type                 Role
-  specialization       String           @default("Sin especializacion")
   status               State
   content              String?
   birthdate            DateTime         @default(dbgenerated("CURRENT_TIMESTAMP"))
-  nationality_id       Int //Clave foranea hacia nacionality
+  nationality_id       Int // Clave foránea hacia Nationality
   nationality          Nationality      @relation(fields: [nationality_id], references: [id])
-  names                Name[] //Relacion de uno a muchos
-  direction            Direction[] //Relacion de uno a muchos
+  names                Name[] // Relación de uno a muchos
+  direction            Direction[] // Relación de uno a muchos
   questions_secret     QuestionSecret[]
   cedula               String           @unique @default("00000000")
   createdAt            DateTime?        @default(now())
   updateAt             DateTime?        @updatedAt
   resetPasswordToken   String?
   resetPasswordExpires DateTime?
-
-  teacher_id Int?
-  teacher    User? @relation("Teacher", fields: [teacher_id], references: [id], onDelete: Cascade)
-
-  preparers User[] @relation("Teacher")
+  teacher_id           Int?
+  teacher              User?            @relation("Teacher", fields: [teacher_id], references: [id], onDelete: Cascade)
+  preparers            User[]           @relation("Teacher")
+  subject_id           Int? // Clave foránea hacia Subject
+  subject              Subject?         @relation("UserSubject", fields: [subject_id], references: [id]) // Materia asignada
+  subjectsAsTeacher    Subject[]        @relation("TeacherToSubject") // Materias donde el usuario es profesor
+  subjectsAsPreparer   Subject[]        @relation("PreparerToSubject") // Materias donde el usuario es preparador
 
   @@unique([email], map: "user_email_unique")
   @@map("user")
@@ -72,6 +73,28 @@ model Name {
   first_surname  String
   second_surname String
   user           User   @relation(fields: [user_id], references: [id])
+}
+
+model Subject {
+  id          Int        @id @default(autoincrement())
+  name        String // Nombre de la materia
+  teacher_id  Int // Clave foránea hacia el profesor
+  teacher     User       @relation("TeacherToSubject", fields: [teacher_id], references: [id])
+  preparer_id Int? // Clave foránea hacia el preparador (opcional)
+  preparer    User?      @relation("PreparerToSubject", fields: [preparer_id], references: [id])
+  materials   Material[]
+  createdAt   DateTime?  @default(now())
+  updatedAt   DateTime?  @updatedAt
+  users       User[]     @relation("UserSubject") // Relación de muchos a muchos
+}
+
+model Material {
+  id         Int       @id @default(autoincrement())
+  subject_id Int //Llave foranea hacia subject
+  subject    Subject   @relation(fields: [subject_id], references: [id])
+  file_url   String //Url del material
+  type       String //Tipo de material (pdf, video, imagen)
+  createdAt  DateTime? @default(now())
 }
 
 model Direction {
