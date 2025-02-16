@@ -63,7 +63,6 @@ export async function createAdminUser() {
     }
 }
 
-// const teacherSchema = z.object({
 //     firstName: z.string().min(2, "El primer nombre es requerido"),
 //     secondName: z.string().optional(),
 //     firstLastName: z.string().min(2, "El primer apellido es requerido"),

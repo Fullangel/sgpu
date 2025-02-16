@@ -1,6 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import { RegisterFormValues } from '@/lib/schemas/registerSchemas';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 
 const SALT_ROUNDS = 10;
 

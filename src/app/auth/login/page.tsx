@@ -14,7 +14,6 @@ import { Loader2, AlertCircle } from "lucide-react";
 import { motion } from "framer-motion";
 import { getCsrfToken } from "next-auth/react";
 
-// Interfaces TypeScript
 interface LoginFormData {
   email: string;
   password: string;
@@ -39,7 +38,12 @@ export default function LoginPage() {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<LoginFormData>();
+  } = useForm<LoginFormData>({
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
 
   // Obtener token CSRF
   useEffect(() => {
@@ -97,6 +101,7 @@ export default function LoginPage() {
           res.json()
         );
         const role = session?.user?.role;
+        console.log("Rol del usuario:", role); // Log del rol
 
         //redireccion segun el rol
         switch (role) {
@@ -104,7 +109,8 @@ export default function LoginPage() {
             router.push("/admin");
             break;
           case "Teacher":
-            router.push("/teacher");
+            console.log("Redirigiendo a /teacher/dashboard");
+            router.push("/teacher/dashboard");
             break;
           case "Assistant":
             router.push("/assistant");
@@ -254,7 +260,7 @@ export default function LoginPage() {
                         hasNumber: (value) =>
                           /\d/.test(value) || "Debe contener un número",
                         hasSpecial: (value) =>
-                          /[!@#$%^&*]/.test(value) ||
+                          /[!@#$%^&*()-_=+{};:,<.>/?]/.test(value) ||
                           "Debe contener un carácter especial",
                       },
                     })}
