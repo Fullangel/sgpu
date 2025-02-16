@@ -43,6 +43,6 @@ export async function POST(request: Request) {
                 { status: 400 }
             );
         }
-        return NextResponse.json({ error: "Error interno del servidor" }, { status: 500 });
+        return NextResponse.json({ error: "Error interno del servidor", details: error?.message || "Error desconocido" }, { status: 500 });
     }
 }

@@ -53,13 +53,15 @@ model User {
   updateAt             DateTime?        @updatedAt
   resetPasswordToken   String?
   resetPasswordExpires DateTime?
-  teacher_id           Int?
-  teacher              User?            @relation("Teacher", fields: [teacher_id], references: [id], onDelete: Cascade)
-  preparers            User[]           @relation("Teacher")
-  subject_id           Int? // Clave foránea hacia Subject
-  subject              Subject?         @relation("UserSubject", fields: [subject_id], references: [id]) // Materia asignada
-  subjectsAsTeacher    Subject[]        @relation("TeacherToSubject") // Materias donde el usuario es profesor
-  subjectsAsPreparer   Subject[]        @relation("PreparerToSubject") // Materias donde el usuario es preparador
+  // teacher_id           Int?
+  // teacher              User?            @relation("Teacher", fields: [teacher_id], references: [id], onDelete: Cascade)
+  // preparers            User[]           @relation("Teacher")
+  // subject_id           Int? // Clave foránea hacia Subject
+  // subject              Subject?         @relation("UserSubject", fields: [subject_id], references: [id])
+  subjects             UserSubject[]    @relation("UserSubject")
+
+  subjectsAsTeacher  Subject[] @relation("TeacherToSubject") // Materias donde el usuario es profesor
+  subjectsAsPreparer Subject[] @relation("PreparerToSubject") // Materias donde el usuario es preparador
 
   @@unique([email], map: "user_email_unique")
   @@map("user")
@@ -76,16 +78,16 @@ model Name {
 }
 
 model Subject {
-  id          Int        @id @default(autoincrement())
+  id          Int           @id @default(autoincrement())
   name        String // Nombre de la materia
   teacher_id  Int // Clave foránea hacia el profesor
-  teacher     User       @relation("TeacherToSubject", fields: [teacher_id], references: [id])
+  teacher     User          @relation("TeacherToSubject", fields: [teacher_id], references: [id])
   preparer_id Int? // Clave foránea hacia el preparador (opcional)
-  preparer    User?      @relation("PreparerToSubject", fields: [preparer_id], references: [id])
+  preparer    User?         @relation("PreparerToSubject", fields: [preparer_id], references: [id])
   materials   Material[]
-  createdAt   DateTime?  @default(now())
-  updatedAt   DateTime?  @updatedAt
-  users       User[]     @relation("UserSubject") // Relación de muchos a muchos
+  createdAt   DateTime?     @default(now())
+  updatedAt   DateTime?     @updatedAt
+  users       UserSubject[] @relation("UserSubject") // Relación de muchos a muchos
 }
 
 model Material {
@@ -110,4 +112,13 @@ model QuestionSecret {
   question String
   answer   String
   user     User   @relation(fields: [user_id], references: [id])
+}
+
+model UserSubject {
+  user_id    Int
+  subject_id Int
+  user       User    @relation("UserSubject", fields: [user_id], references: [id], map: "UserSubject_user_fkey")
+  subject    Subject @relation("UserSubject", fields: [subject_id], references: [id], map: "UserSubject_subject_fkey")
+
+  @@id([user_id, subject_id])
 }

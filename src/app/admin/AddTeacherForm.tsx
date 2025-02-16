@@ -48,7 +48,17 @@ export default function AddTeacherForm({
     control,
     handleSubmit,
     formState: { errors },
-  } = useForm<FormData>();
+  } = useForm<FormData>({
+    defaultValues: {
+      firstName: "",
+      firstLastName: "",
+      email: "",
+      password: "",
+      nationality_id: "V",
+      address: "",
+      subjectName: "",
+    },
+  });
 
   const onSubmit = async (data: FormData) => {
     setIsSubmitting(true);
@@ -57,6 +67,14 @@ export default function AddTeacherForm({
         ...data,
         name: `${data.firstName} ${data.firstLastName}`,
         subject: data.subjectName,
+        email: data.email,
+        password: data.password,
+        nationality_id: data.nationality_id,
+        address: data.address,
+        subjectName: data.subjectName,
+        secondName: data.secondName || undefined,
+        secondLastName: data.secondLastName || undefined,
+        cedula: data.cedula || undefined,
       };
 
       const response = await fetch("/api/teachers/create-teacher", {
@@ -74,7 +92,7 @@ export default function AddTeacherForm({
       console.log(result);
       onAddTeacher({
         name: teacherData.name,
-        subject: teacherData.subject,
+        subject: teacherData.subjectName,
       });
 
       toast.success("Profesor agregado correctamente");
@@ -194,7 +212,13 @@ export default function AddTeacherForm({
             <Input
               id="password"
               type={showPassword ? "text" : "password"}
-              {...register("password")}
+              {...register("password", {
+                required: "La contraseña es obligatoria",
+                minLength: {
+                  value: 8,
+                  message: "La contraseña debe tener al menos 8 caracteres",
+                },
+              })}
               className="w-full pr-10"
             />
             <button

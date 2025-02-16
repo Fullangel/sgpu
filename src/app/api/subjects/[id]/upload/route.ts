@@ -1,42 +1,64 @@
-import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-import { writeFile } from 'fs/promises';
-import path from 'path';
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import path from "path";
+import fs from "fs/promises";
 
 export async function POST(request: Request, { params }: { params: { id: string } }) {
     try {
         const { id } = params;
-        const parsedId = parseInt(id, 10);
 
-        if (isNaN(parsedId)) {
-            return NextResponse.json({ error: "ID inválido" }, { status: 400 });
-        }
+        const subjectId = await validateSubjectId(id);
 
         const formData = await request.formData();
-        const file = formData.get('file') as File;
+        const file = formData.get("file") as File;
 
         if (!file) {
-            return NextResponse.json({ error: "Archivo no encontrado" }, { status: 400 });
+            return NextResponse.json({ error: "Archivo no proporcionado" }, { status: 400 });
         }
 
-        //Guarda el archivo en el servidor
-        const buffer: Buffer = Buffer.from(await file.arrayBuffer());
-        const fileName = `${Date.now()}=${file.name}`;
-        const filePath = path.join(process.cwd(), 'public/uploads', fileName);
-        await writeFile(filePath, buffer);
+        const buffer = Buffer.from(await file.arrayBuffer());
+        const fileName = `${Date.now()}-${file.name}`;
+        const filePath = path.join(process.cwd(), "public", "uploads", fileName);
 
-        //Guardar el archivo en la bd
-        const material = await prisma.material.create({
+        // Guardar el archivo en el sistema de archivos
+        await fs.mkdir(path.dirname(filePath), { recursive: true }); // Crear directorio si no existe
+        await fs.writeFile(filePath, buffer);
+
+        // Guardar la URL del archivo en la base de datos
+        const fileUrl = `/uploads/${fileName}`;
+        const newMaterial = await prisma.material.create({
             data: {
-                subject_id: parsedId,
-                file_url: `/uploads/${fileName}`,
-                type: file.type,
+                subject_id: subjectId,
+                file_url: fileUrl,
+                type: file.type || "unknown",
             },
         });
 
-        return NextResponse.json(material, { status: 201 });
+        return NextResponse.json(newMaterial, { status: 201 });
     } catch (error) {
-        console.error("Error al subir al archivo:", error instanceof Error ? error.message : "Error desconocido")
-        return NextResponse.json({ error: "Error interno del servidor" }, { status: 500 });
+        console.error("Error al subir el archivo:", error);
+        return NextResponse.json(
+            { error: "Error interno del servidor" },
+            { status: 500 }
+        );
     }
+}
+
+async function validateSubjectId(id: string): Promise<number> {
+    const parsedId = parseInt(id, 10);
+
+    if (isNaN(parsedId)) {
+        throw new Error("ID inválido");
+    }
+
+    // Verificar si el ID existe en la base de datos
+    const subject = await prisma.subject.findUnique({
+        where: { id: parsedId },
+    });
+
+    if (!subject) {
+        throw new Error("Materia no encontrada");
+    }
+
+    return parsedId;
 }
