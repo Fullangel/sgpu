@@ -1,9 +1,11 @@
 "use client";
+
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Book, Upload, AlertCircle } from "lucide-react";
 import { SubjectCard } from "@/components/ui/SubjectCard";
 import type { Subject } from "@/types/subject";
+import { getCsrfToken } from "next-auth/react";
 
 export default function MateriasPage() {
   const [subjects, setSubjects] = useState<Subject[]>([]);
@@ -38,11 +40,15 @@ export default function MateriasPage() {
       return;
     }
     try {
+      const csrfToken = (await getCsrfToken()) || "";
       const response = await fetch(
         `/api/subjects/${selectedSubjectId}/upload`,
         {
           method: "POST",
           body: formData,
+          headers: {
+            "X-CSRF-Token": csrfToken,
+          },
         }
       );
       if (response.ok) {

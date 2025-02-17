@@ -13,8 +13,18 @@ export async function middleware(request: NextRequest) {
         return NextResponse.redirect(new URL("/auth/login", request.url));
     }
 
-    if (pathname.startsWith("/teacher") && token?.role !== "Teacher") {
-        console.log("Acceso denegado a /teacher. Rol del usuario:", token?.role);
+    if (pathname.startsWith("/teacher/dashboard") && token?.role !== "Teacher") {
+        console.log("Acceso denegado a /teacher/dashboard. Rol del usuario:", token?.role);
+        return NextResponse.redirect(new URL("/auth/login", request.url));
+    }
+
+    if (pathname.startsWith("/admin") && token?.role !== "Admin") {
+        console.log("Acceso denegado a /admin. Rol del usuario:", token?.role);
+        return NextResponse.redirect(new URL("/auth/login", request.url));
+    }
+
+    if (pathname.startsWith("/assistant") && token?.role !== "Assistant") {
+        console.log("Acceso denegado a /assistant. Rol del usuario:", token?.role);
         return NextResponse.redirect(new URL("/auth/login", request.url));
     }
 
@@ -23,5 +33,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-    matcher: ["/teacher/:path*", "/admin/:path*", "/assistant/:path*"],
+    matcher: ["/teacher/:path*", "/admin/:path*", "/assistant/:path*", "/api/subjects/:path*",],
 };

@@ -53,15 +53,15 @@ model User {
   updateAt             DateTime?        @updatedAt
   resetPasswordToken   String?
   resetPasswordExpires DateTime?
-  // teacher_id           Int?
-  // teacher              User?            @relation("Teacher", fields: [teacher_id], references: [id], onDelete: Cascade)
-  // preparers            User[]           @relation("Teacher")
-  // subject_id           Int? // Clave foránea hacia Subject
-  // subject              Subject?         @relation("UserSubject", fields: [subject_id], references: [id])
+  teacher_id           Int?
+  teacher              User?            @relation("TeacherPreparer", fields: [teacher_id], references: [id], onDelete: Cascade)
+  preparers            User[]           @relation("TeacherPreparer")
   subjects             UserSubject[]    @relation("UserSubject")
 
   subjectsAsTeacher  Subject[] @relation("TeacherToSubject") // Materias donde el usuario es profesor
   subjectsAsPreparer Subject[] @relation("PreparerToSubject") // Materias donde el usuario es preparador
+
+  materials Material[]
 
   @@unique([email], map: "user_email_unique")
   @@map("user")
@@ -79,7 +79,7 @@ model Name {
 
 model Subject {
   id          Int           @id @default(autoincrement())
-  name        String // Nombre de la materia
+  name        String        @unique // Nombre de la materia
   teacher_id  Int // Clave foránea hacia el profesor
   teacher     User          @relation("TeacherToSubject", fields: [teacher_id], references: [id])
   preparer_id Int? // Clave foránea hacia el preparador (opcional)
@@ -92,11 +92,14 @@ model Subject {
 
 model Material {
   id         Int       @id @default(autoincrement())
+  name       String
   subject_id Int //Llave foranea hacia subject
   subject    Subject   @relation(fields: [subject_id], references: [id])
   file_url   String //Url del material
   type       String //Tipo de material (pdf, video, imagen)
   createdAt  DateTime? @default(now())
+  teacher_id Int // Clave foránea hacia el profesor
+  teacher    User      @relation(fields: [teacher_id], references: [id])
 }
 
 model Direction {

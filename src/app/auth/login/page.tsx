@@ -75,6 +75,8 @@ export default function LoginPage() {
         csrfToken,
       });
 
+      console.log("Respuesta del servidor:", res);
+
       if (res?.error) {
         const errorMapping: ErrorMessages = {
           CredentialsSignin: "Credenciales incorrectas",

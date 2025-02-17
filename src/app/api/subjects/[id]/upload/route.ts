@@ -2,12 +2,26 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import path from "path";
 import fs from "fs/promises";
+import { getSession } from "next-auth/react";
 
-export async function POST(request: Request, { params }: { params: { id: string } }) {
+export async function POST(request: Request, { params }: { params: { subjectId: string } }) {
     try {
-        const { id } = params;
+        const session = await getSession();
+        if (!session || !session.user?.id) {
+            return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+        }
 
-        const subjectId = await validateSubjectId(id);
+        if (session.user.role !== "Admin" && session.user.role !== "Teacher") {
+            return NextResponse.json({ error: "Acceso denegado" }, { status: 403 });
+        }
+
+        const teacherId = session.user.id;
+
+        const subjectId = parseInt(params.subjectId, 10);
+
+        if (!subjectId) {
+            return NextResponse.json({ error: "ID de asignatura no proporcionado" }, { status: 400 });
+        }
 
         const formData = await request.formData();
         const file = formData.get("file") as File;
@@ -28,9 +42,11 @@ export async function POST(request: Request, { params }: { params: { id: string 
         const fileUrl = `/uploads/${fileName}`;
         const newMaterial = await prisma.material.create({
             data: {
+                name: file.name || "Sin nombre",
                 subject_id: subjectId,
                 file_url: fileUrl,
                 type: file.type || "unknown",
+                teacher_id: teacherId,
             },
         });
 
@@ -44,21 +60,21 @@ export async function POST(request: Request, { params }: { params: { id: string 
     }
 }
 
-async function validateSubjectId(id: string): Promise<number> {
-    const parsedId = parseInt(id, 10);
+// async function validateSubjectId(id: string): Promise<number> {
+//     const parsedId = parseInt(id, 10);
 
-    if (isNaN(parsedId)) {
-        throw new Error("ID inválido");
-    }
+//     if (isNaN(parsedId)) {
+//         throw new Error("ID inválido");
+//     }
 
-    // Verificar si el ID existe en la base de datos
-    const subject = await prisma.subject.findUnique({
-        where: { id: parsedId },
-    });
+//     // Verificar si el ID existe en la base de datos
+//     const subject = await prisma.subject.findUnique({
+//         where: { id: parsedId },
+//     });
 
-    if (!subject) {
-        throw new Error("Materia no encontrada");
-    }
+//     if (!subject) {
+//         throw new Error("Materia no encontrada");
+//     }
 
-    return parsedId;
-}
+//     return parsedId;
+// }
