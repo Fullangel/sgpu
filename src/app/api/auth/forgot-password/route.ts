@@ -96,12 +96,31 @@ export async function POST(request: Request) {
         // Enviar el correo con el enlace de restablecimiento
         const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL}/auth/reset-password?token=${resetPasswordToken}`;
         const mailOptions = {
-            from: `"SGPU EMAIL" <${process.env.EMAIL_USER}>`,
+            from: `"SGPU - Sistema de Gestión de Preparadurías Universitarias" <${process.env.EMAIL_USER}>`,
             to: body.email,
             subject: 'Recuperación de Contraseña',
-            text: ` <p>Hola ${user.name || 'usuario'}.</p><p>Has solicitado restablecer tu contraseña.
-            Haz clic en el siguiente enlace para restablecer tu contraseña: ${resetUrl}`,
-            html: `<p>Haz clic en el siguiente enlace para restablecer tu contraseña:</p><a href="${resetUrl}">${resetUrl}</a>`,
+            text: `Hola ${user.name || 'usuario'},\n\nHas solicitado restablecer tu contraseña. Haz clic en el siguiente enlace para restablecer tu contraseña: ${resetUrl}`,
+            html: `
+    <div style="font-family: Arial, sans-serif; color: #333;">
+      <div style="text-align: center; padding: 20px; background-color: #f7f7f7;">
+        <img src="@/public/logo.svg" alt="SGPU Logo" style="width: 150px; height: auto;">
+      </div>
+      <div style="padding: 20px;">
+        <h1 style="color: #4CAF50;">Recuperación de Contraseña</h1>
+        <p>Hola ${user.name || 'usuario'},</p>
+        <p>Has solicitado restablecer tu contraseña. Haz clic en el siguiente enlace para restablecer tu contraseña:</p>
+        <p style="text-align: center;">
+          <a href="${resetUrl}" style="display: inline-block; padding: 10px 20px; font-size: 16px; color: #fff; background-color: #4CAF50; text-decoration: none; border-radius: 5px;">Restablecer Contraseña</a>
+        </p>
+        <p>Si no solicitaste este correo, ignóralo.</p>
+        <br>
+        <p>Atentamente,<br>El equipo de SGPU</p>
+      </div>
+      <div style="text-align: center; padding: 20px; background-color: #f7f7f7;">
+        <p style="font-size: 12px; color: #777;">© 2025 SGPU. Todos los derechos reservados.</p>
+      </div>
+    </div>
+  `,
         };
 
         await transporter.sendMail(mailOptions);

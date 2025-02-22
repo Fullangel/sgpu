@@ -132,15 +132,25 @@ export async function POST(request: Request) {
             to: newUser.email,
             subject: '¡Bienvenido/a al Sistema de Gestión de Preparadurías Universitarias!',
             text: `Hola ${newUser.username},\n\n¡Gracias por registrarte en nuestro sistema! Estamos emocionados de tenerte como parte de nuestra comunidad.`,
-            html: ` 
-                    <h1>¡Bienvenido/a, ${newUser.username}!</h1>
-                    <p>Gracias por registrarte en el <strong>Sistema de Gestión de Preparadurías Universitarias</strong>.</p>
-                    <p>Estamos emocionados de tenerte como parte de nuestra comunidad.</p>
-                    <p>Por favor, verifica tu correo electrónico para completar el proceso de registro.</p>
-                    <p>Si tienes alguna pregunta, no dudes en contactarnos.</p>
-                    <br>
-                    <p>Atentamente,<br>El equipo de SGPU</p>
-                    `,
+            html: `
+    <div style="font-family: Arial, sans-serif; color: #333;">
+      <div style="text-align: center; padding: 20px; background-color: #f7f7f7;">
+        <img src="@/public/logo.svg" alt="SGPU Logo" style="width: 150px; height: auto;">
+      </div>
+      <div style="padding: 20px;">
+        <h1 style="color: #4CAF50;">¡Bienvenido/a, ${newUser.username}!</h1>
+        <p>Gracias por registrarte en el <strong>Sistema de Gestión de Preparadurías Universitarias</strong>.</p>
+        <p>Estamos emocionados de tenerte como parte de nuestra comunidad.</p>
+        <p>Por favor, verifica tu correo electrónico para completar el proceso de registro.</p>
+        <p>Si tienes alguna pregunta, no dudes en contactarnos.</p>
+        <br>
+        <p>Atentamente,<br>El equipo de SGPU</p>
+      </div>
+      <div style="text-align: center; padding: 20px; background-color: #f7f7f7;">
+        <p style="font-size: 12px; color: #777;">© 2025 SGPU. Todos los derechos reservados.</p>
+      </div>
+    </div>
+  `,
         };
 
         await transporter.sendMail(mailOptions);
