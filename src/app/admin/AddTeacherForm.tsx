@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useForm, Controller } from "react-hook-form";
+import { useEffect, useState } from "react";
+import { useForm, Controller, watch } from "react-hook-form";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { Input } from "@/components/ui/input";
@@ -34,6 +34,7 @@ interface FormData {
   nationality_id: "V" | "E";
   address: string;
   subjectName: string;
+  specialization: string;
 }
 
 export default function AddTeacherForm({
@@ -48,6 +49,7 @@ export default function AddTeacherForm({
     control,
     handleSubmit,
     formState: { errors },
+    setError,
   } = useForm<FormData>({
     defaultValues: {
       firstName: "",
@@ -57,12 +59,23 @@ export default function AddTeacherForm({
       nationality_id: "V",
       address: "",
       subjectName: "",
+      specialization: "",
     },
   });
 
   const onSubmit = async (data: FormData) => {
+    console.log("Datos enviados al backend:", data);
+
     setIsSubmitting(true);
+
     try {
+      if (!data.specialization || data.specialization.trim().length < 2) {
+        setError("specialization", {
+          message: "La especialización es requerida",
+        });
+        return;
+      }
+
       const teacherData = {
         ...data,
         name: `${data.firstName} ${data.firstLastName}`,
@@ -75,6 +88,7 @@ export default function AddTeacherForm({
         secondName: data.secondName || undefined,
         secondLastName: data.secondLastName || undefined,
         cedula: data.cedula || undefined,
+        specialization: data.specialization,
       };
 
       const response = await fetch("/api/teachers/create-teacher", {
@@ -85,7 +99,8 @@ export default function AddTeacherForm({
       console.log("Datos enviados al backend:", teacherData);
 
       if (!response.ok) {
-        throw new Error("Error al agregar al profesor");
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Error al agregar al profesor");
       }
 
       const result = await response.json();
@@ -244,6 +259,25 @@ export default function AddTeacherForm({
             <p className="text-red-500 text-sm">{errors.address.message}</p>
           )}
         </div>
+
+        {/* Campo de Especialización */}
+        <div>
+          <Label>Especialización</Label>
+          <Input
+            {...register("specialization", {
+              required: "La especialización es requerida",
+              minLength: {
+                value: 2,
+                message: "La especialización debe tener al menos 2 caracteres",
+              },
+            })}
+            placeholder="Ingresa la especialización"
+          />
+          {errors.specialization && (
+            <span>{errors.specialization.message}</span>
+          )}
+        </div>
+
         <div className="space-y-2">
           <Label htmlFor="subjectName">Nombre de la Materia</Label>
           <Input

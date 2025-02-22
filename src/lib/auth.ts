@@ -63,26 +63,6 @@ export async function createAdminUser() {
     }
 }
 
-//     firstName: z.string().min(2, "El primer nombre es requerido"),
-//     secondName: z.string().optional(),
-//     firstLastName: z.string().min(2, "El primer apellido es requerido"),
-//     secondLastName: z.string().optional(),
-//     cedula: z
-//         .string()
-//         .regex(/^\d{7,8}$/, "La cédula debe tener entre 7 y 8 dígitos")
-//         .optional(),
-//     email: z.string().email("Correo electrónico inválido"),
-//     password: z.string().min(8, "La contraseña debe tener al menos 8 caracteres"),
-//     nationality_id: z.enum(["V", "E"]),
-//     address: z.string().min(5, "La dirección es requerida"),
-//     specialization: z.string().min(2, "La especialización es requerida"),
-// }).transform((data) => ({
-//     ...data,
-//     name: `${data.firstName} ${data.firstLastName}`, // Generar el campo `name`
-// }));
-
-// type TeacherData = z.infer<typeof teacherSchema>;
-
 interface CreateTeacherResponse {
     id: number;
     name: string;
@@ -91,11 +71,14 @@ interface CreateTeacherResponse {
         id: number;
         name: string;
     } | null; // `subject` puede ser `null` si no hay una materia asignada
+    specialization: {
+        id: number;
+        name: string;
+    }; // Especialización asociada al profesor
     createdAt: Date;
 }
 
 export async function createTeacher(data: {
-    // name?: string;
     firstName: string;
     firstLastName: string;
     email: string;
@@ -103,12 +86,25 @@ export async function createTeacher(data: {
     nationality_id: "V" | "E";
     address: string;
     subjectName: string;
+    specialization: string;
     secondName?: string | undefined;
     secondLastName?: string | undefined;
     cedula?: string | undefined;
 }): Promise<CreateTeacherResponse> {
     try {
         const hashedPassword = await bcrypt.hash(data.password, 12);
+
+        //Verifica si la especializacion existe
+        let specialization = await prisma.specialization.findUnique({
+            where: { name: data.specialization },
+        });
+
+        // En caso de que no, la crea
+        if (!specialization) {
+            specialization = await prisma.specialization.create({
+                data: { name: data.specialization },
+            });
+        }
 
         // Crear el usuario en la base de datos
         const newUser = await prisma.user.create({
@@ -147,6 +143,11 @@ export async function createTeacher(data: {
                         address: data.address,
                     },
                 },
+                specialization: {
+                    connect: {
+                        id: specialization.id, // Asociar la especialización al profesor
+                    },
+                },
             },
         });
 
@@ -159,16 +160,22 @@ export async function createTeacher(data: {
                         id: newUser.id,  //conectar la materia al profesor recien creado
                     },
                 },
+                specialization: {
+                    connect: {
+                        id: specialization.id, // Conectar la especialización a la materia
+                    },
+                },
             },
         });
 
-        console.log("✅ Profesor y materia creados exitosamente");
+        console.log("✅ Profesor, especializacion y materia creados exitosamente");
 
         return {
             id: newUser.id,
             name: newUser.name,
             email: newUser.email,
             subject: { id: newSubject.id, name: newSubject.name },
+            specialization: { id: specialization.id, name: specialization.name },
             createdAt: new Date(),
         };
 

@@ -10,7 +10,7 @@ export const registerSchema = z.object({
         message: "La nacionalidad es requerida",
     }),
     cedula: z.string().nonempty("La cédula es requerida"),
-    specialization: z.string().nonempty("La especialización es requerida"),
+    specialization_name: z.string().min(1, "Selecciona una especialización válida"),
     address: z.string().nonempty("La dirección es requerida"),
     email: z.string().email("El correo electrónico es inválido"),
     username: z.string().nonempty("El nombre de usuario es requerido"),

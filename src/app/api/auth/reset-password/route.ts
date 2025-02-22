@@ -1,142 +1,100 @@
-import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-import bcrypt from 'bcrypt';
+import { NextResponse } from "next/server";
+import { PrismaClient } from "@prisma/client";
+import bcrypt from "bcryptjs";
+
+const prisma = new PrismaClient();
 
 export async function POST(request: Request) {
     try {
-<<<<<<< HEAD
-        const { token, newPassword } = await request.json();
+        const { token, newPassword }: { token: string; newPassword: string } = await request.json();
 
-        // 1. Buscar usuario por token válido
-        const user = await prisma.user.findFirst({
-            where: {
-                resetToken: token,
-                resetTokenExpires: { gt: new Date() },
-            },
-=======
-        const { email, code, newPassword } = await request.json();
+        // Validar que los campos necesarios estén presentes
+        if (!token || !newPassword) {
+            return NextResponse.json({ error: "Faltan campos requeridos" }, { status: 400 });
+        }
 
+        // Buscar el usuario por el token
         const user = await prisma.user.findFirst({
-            where: {
-                email,
-                resetPasswordCode: code,
-                resetPasswordExpires: { gt: new Date() }
-            }
->>>>>>> 6f7fd1c4257e360cd27bc392a0d83738da5507f7
+            where: { resetPasswordToken: token },
         });
 
         if (!user) {
-            return NextResponse.json(
-<<<<<<< HEAD
-                { error: "Token inválido o expirado" },
-=======
-                { error: "Código inválido o expirado" },
->>>>>>> 6f7fd1c4257e360cd27bc392a0d83738da5507f7
-                { status: 400 }
-            );
+            return NextResponse.json({ error: "Token inválido o expirado" }, { status: 400 });
         }
 
-<<<<<<< HEAD
-        // 2. Hashear nueva contraseña
+        // Hashear la nueva contraseña
         const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-        // 3. Actualizar contraseña y limpiar token
+        // Actualizar la contraseña del usuario
         await prisma.user.update({
             where: { id: user.id },
             data: {
-                password: hashedPassword,
-                resetToken: null,
-                resetTokenExpires: null,
+                password: hashedPassword, // Asegúrate de hashear la contraseña antes de guardarla
+                resetPasswordToken: null,
             },
         });
 
-        return NextResponse.json({ success: true });
-
+        return NextResponse.json({ success: true, message: "Contraseña actualizada" }, { status: 200 });
     } catch (error) {
-        console.error(error);
-        return NextResponse.json(
-            { error: "Error al actualizar contraseña" },
-            { status: 500 }
-        );
-    }
-}
-=======
-        const hashedPassword = await bcrypt.hash(newPassword, 10);
-
-        await prisma.user.update({
-            where: { email },
-            data: {
-                password: hashedPassword,
-                resetPasswordCode: null,
-                resetPasswordExpires: null
-            }
-        });
-
-        return NextResponse.json({ message: "Contraseña actualizada exitosamente" });
-
-    } catch (error) {
-        return NextResponse.json(
-            { error: "Error interno del servidor" },
-            { status: 500 }
-        );
+        console.error("Error al restablecer la contraseña:", error);
+        return NextResponse.json({ error: "Error interno del servidor" }, { status: 500 });
     }
 }
 
 // import { NextResponse } from 'next/server';
 // import { prisma } from '@/lib/prisma';
-// import bcrypt from 'bcrypt';
+// import bcrypt from 'bcryptjs';
 
 // export async function POST(request: Request) {
 //     try {
-//         const { token, password, answer } = await request.json();
+//         // 1. Extraer datos del cuerpo de la solicitud
+//         const { email, code, newPassword } = await request.json();
 
+//         // 2. Validar que todos los campos estén presentes
+//         if (!email || !code || !newPassword) {
+//             return NextResponse.json(
+//                 { error: "Todos los campos son obligatorios" },
+//                 { status: 400 }
+//             );
+//         }
+
+//         // 3. Buscar usuario por correo electrónico, código válido y fecha de expiración
 //         const user = await prisma.user.findFirst({
 //             where: {
-//                 resetPasswordToken: token,
-//                 resetPasswordExpires: { gt: new Date() }
+//                 email,
+//                 resetPasswordToken: code,
+//                 resetPasswordExpires: { gt: new Date() }, // Verifica que el código no haya expirado
 //             },
-//             include: { questions_secret: true }
 //         });
 
+//         // 4. Si no se encuentra el usuario o el código es inválido/expirado
 //         if (!user) {
 //             return NextResponse.json(
-//                 {
-//                     error: 'Token Invalido o expirado'
-//                 }, { status: 400 }
+//                 { error: "Código inválido o expirado" },
+//                 { status: 400 }
 //             );
 //         }
 
-//         //Verifica la respuesta
-//         const isValidAnswer = answer.ToLowerCase() === user.questions_secret[0].answer.toLowerCase();
+//         // 5. Hashear la nueva contraseña
+//         const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-//         if (!isValidAnswer) {
-//             return NextResponse.json(
-//                 {
-//                     error: 'Respuesta Incorrecta'
-//                 }, { status: 400 }
-//             );
-//         }
-
-//         //Actualiza la contrase;a
-//         const hashedPassword = await bcrypt.hash(password, 10);
-
+//         // 6. Actualizar la contraseña y limpiar los campos de restablecimiento
 //         await prisma.user.update({
-//             where: { id: user.id },
+//             where: { email },
 //             data: {
 //                 password: hashedPassword,
 //                 resetPasswordToken: null,
-//                 resetPasswordExpires: null
-//             }
+//                 resetPasswordExpires: null,
+//             },
 //         });
 
-//         return NextResponse.json({ message: 'Contrase;a actualizada exitosamente' });
-
+//         // 7. Respuesta exitosa
+//         return NextResponse.json({ message: "Contraseña actualizada exitosamente" });
 //     } catch (error) {
-//         console.error(error);
+//         console.error("Error al actualizar la contraseña:", error);
 //         return NextResponse.json(
-//             { error: 'Error interno del servidor' },
+//             { error: "Error interno del servidor" },
 //             { status: 500 }
 //         );
 //     }
 // }
->>>>>>> 6f7fd1c4257e360cd27bc392a0d83738da5507f7

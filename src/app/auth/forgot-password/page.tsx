@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -11,7 +11,9 @@ import Link from "next/link";
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
+  const [answer, setAnswer] = useState("");
   const [loading, setLoading] = useState(false);
+  const [securityAnswerError, setSecurityAnswerError] = useState("");
   const [message, setMessage] = useState("");
   const router = useRouter();
 
@@ -19,12 +21,15 @@ export default function ForgotPassword() {
     e.preventDefault();
     setLoading(true);
     setMessage("");
-
+    setSecurityAnswerError("");
     try {
+      console.log("Datos enviados al backend:", { email, answer });
+
+      // Llamada única al backend para validar y enviar el correo
       const response = await fetch("/api/auth/forgot-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, answer }),
       });
 
       const data = await response.json();
@@ -41,6 +46,58 @@ export default function ForgotPassword() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (message) {
+      const timer = setTimeout(() => setMessage(""), 5000); // Desaparece después de 5 segundos
+      return () => clearTimeout(timer);
+    }
+  }, [message]);
+  //   e.preventDefault();
+  //   setLoading(true);
+  //   setMessage("");
+
+  //   try {
+  //     console.log("Datos enviados al backend:", { email, answer });
+  //     // Validar la respuesta de seguridad
+  //     const validationResponse = await fetch(
+  //       "/api/auth/validate-security-answer",
+  //       {
+  //         method: "POST",
+  //         headers: { "Content-Type": "application/json" },
+  //         body: JSON.stringify({ email, answer }),
+  //       }
+  //     );
+
+  //     const validationData = await validationResponse.json();
+
+  //     if (!validationResponse.ok) {
+  //       setMessage(validationData.error || "Respuesta de seguridad incorrecta");
+  //       setLoading(false);
+  //       return;
+  //     }
+
+  //     // Si la respuesta de seguridad es válida, enviar el correo de recuperación
+  //     const response = await fetch("/api/auth/forgot-password", {
+  //       method: "POST",
+  //       headers: { "Content-Type": "application/json" },
+  //       body: JSON.stringify({ email }),
+  //     });
+
+  //     const data = await response.json();
+
+  //     if (response.ok) {
+  //       setMessage("Se ha enviado un enlace de recuperación a tu correo");
+  //       setTimeout(() => router.push("/auth/login"), 3000);
+  //     } else {
+  //       setMessage(data.error || "Error al procesar la solicitud");
+  //     }
+  //   } catch (error) {
+  //     setMessage("Error de conexión con el servidor");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-600 to-purple-700 p-4">
@@ -71,15 +128,25 @@ export default function ForgotPassword() {
               Ingresa tu correo para restablecer tu contraseña
             </p>
           </CardHeader>
-
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-4">
+                {/* Campo de correo electrónico */}
                 <Input
                   type="email"
                   placeholder="correo@ejemplo.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  required
+                  className="bg-white/5 border-white/20 text-white placeholder:text-white/40 hover:bg-white/10 focus:ring-2 focus:ring-blue-300"
+                />
+
+                {/* Campo de respuesta de seguridad */}
+                <Input
+                  type="text"
+                  placeholder="Respuesta de seguridad"
+                  value={answer}
+                  onChange={(e) => setAnswer(e.target.value)}
                   required
                   className="bg-white/5 border-white/20 text-white placeholder:text-white/40 hover:bg-white/10 focus:ring-2 focus:ring-blue-300"
                 />
@@ -100,6 +167,7 @@ export default function ForgotPassword() {
                 )}
               </Button>
 
+              {/* Mensaje de estado */}
               {message && (
                 <motion.div
                   initial={{ opacity: 0, y: -10 }}

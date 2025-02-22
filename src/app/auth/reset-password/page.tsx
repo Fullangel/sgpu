@@ -1,24 +1,56 @@
 "use client";
-import { useState } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import { Loader2, AlertCircle, CheckCircle } from "lucide-react";
 import Image from "next/image";
+import { z } from "zod";
+
+const passwordSchema = z
+  .string()
+  .min(8, "La contraseña debe tener al menos 8 caracteres")
+  .regex(/[A-Z]/, "Debe contener al menos una letra mayúscula")
+  .regex(/[!@#$%^&*-]/, "Debe contener al menos un carácter especial");
+
+const validatePassword = (password: string) => {
+  const result = passwordSchema.safeParse(password);
+  return result.success
+    ? null
+    : result.error.errors.map((e) => e.message).join(", ");
+};
 
 export default function ResetPassword() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const router = useRouter();
-  const token = useSearchParams().get("token");
+  const [token, setToken] = useState<string | null>(null);
+  // const [newPassword, setNewPassword] = useState("");
+
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const tokenFromUrl = urlParams.get("token");
+    if (!tokenFromUrl) {
+      router.push("/auth/forgot-password");
+    } else {
+      setToken(tokenFromUrl);
+    }
+  }, [router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setMessage("");
+
+    const validationError = validatePassword(password);
+    if (validationError) {
+      setMessage(validationError);
+      setLoading(false);
+      return;
+    }
 
     try {
       const response = await fetch("/api/auth/reset-password", {

@@ -23,21 +23,80 @@ export default function RegisterPage() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [specializationError, setSpecializationError] = useState<string | null>(
+    null
+  );
+
+  // useEffect(() => {
+  //   fetch("/api/specializations")
+  //     .then((res) => res.json())
+  //     .then((data) => {
+  //       setSpecializations(
+  //         data.map((specialization: { id: number; name: string }) => ({
+  //           value: specialization.id.toString(),
+  //           label: specialization.name,
+  //         }))
+  //       );
+  //     })
+  //     .catch((error) => {
+  //       console.error("Error al cargar las especializaciones:", error);
+  //     });
+  // }, []);
 
   const {
     control,
     register,
     handleSubmit,
     formState: { errors },
+    setValue,
   } = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
   });
+
+  // Validar la existencia de la especialización por ID
+  const validateSpecialization = async (specializationName: string) => {
+    if (!specializationName || specializationName.trim().length === 0) {
+      setSpecializationError("La especialización es obligatoria.");
+      return false;
+    }
+
+    try {
+      const response = await fetch(
+        `/api/specializations?name=${encodeURIComponent(specializationName)}`
+      );
+      const data = await response.json();
+
+      if (data.length === 0) {
+        setSpecializationError("La especialización no existe.");
+        return false;
+      }
+
+      // Si existe, limpiar el error
+      setSpecializationError(null);
+      return true;
+    } catch (error) {
+      console.error("Error al validar la especialización:", error);
+      setSpecializationError("Error al verificar la especialización.");
+      return false;
+    }
+  };
 
   const onSubmit = async (data: RegisterFormValues) => {
     setIsLoading(true);
     setError(null);
 
+    // Validar la especialización antes de enviar el formulario
+    const isValidSpecialization = await validateSpecialization(
+      data.specialization_name
+    );
+
+    if (!isValidSpecialization) {
+      setIsLoading(false);
+      return;
+    }
+
     try {
+      //Envia los datos al back
       const response = await fetch("/api/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -48,6 +107,7 @@ export default function RegisterPage() {
           type: "Student",
           status: "Active",
           emailVerified: false,
+          specialization_name: data.specialization_name,
         }),
       });
 
@@ -201,13 +261,14 @@ export default function RegisterPage() {
                 transition={{ delay: 0.6 }}
               >
                 <FormSection title="Información Académica">
-                  <FormField
-                    label="Carrera"
-                    id="specialization"
-                    register={register("specialization")}
-                    error={errors.specialization}
-                    inputClassName="bg-white/5 border-white/20 text-white placeholder:text-white/40 hover:bg-white/10 focus:ring-2 focus:ring-blue-300"
+                  <input
+                    {...register("specialization_name")}
+                    placeholder="Ingresa o selecciona una especialización"
+                    onChange={(e) => {
+                      setValue("specialization_name", e.target.value); // Actualizar el valor del formulario
+                    }}
                   />
+                  {specializationError && <p>{specializationError}</p>}
                 </FormSection>
               </motion.div>
 
@@ -329,3 +390,384 @@ export default function RegisterPage() {
     </div>
   );
 }
+
+// "use client";
+
+// import { useState, useEffect } from "react";
+// import { useRouter } from "next/navigation";
+// import { Button } from "@/components/ui/button";
+// import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+// import Link from "next/link";
+// import { Controller, useForm } from "react-hook-form";
+// import { zodResolver } from "@hookform/resolvers/zod";
+// import {
+//   registerSchema,
+//   type RegisterFormValues,
+// } from "@/lib/schemas/registerSchemas";
+// import { Loader2 } from "lucide-react";
+// import { FormField } from "@/components/form/FormField";
+// import { SelectField } from "@/components/form/SelectField";
+// import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
+// export default function RegisterPage() {
+//   const router = useRouter();
+//   const [error, setError] = useState<string | null>(null);
+//   const [isLoading, setIsLoading] = useState(false);
+//   const [specializations, setSpecializations] = useState<
+//     { value: string; label: string }[]
+//   >([]);
+//   const [inputValue, setInputValue] = useState("");
+//   const [showSelect, setShowSelect] = useState(false);
+//   const [activeTab, setActiveTab] = useState("email");
+
+//   const {
+//     control,
+//     register,
+//     handleSubmit,
+//     formState: { errors },
+//     setValue,
+//   } = useForm<RegisterFormValues>({
+//     resolver: zodResolver(registerSchema),
+//   });
+
+//   // Cargar especializaciones desde el backend
+//   useEffect(() => {
+//     fetch("/api/specializations")
+//       .then((res) => res.json())
+//       .then((data) => {
+//         setSpecializations(
+//           data.map((spec: { id: string; name: string }) => ({
+//             value: spec.id,
+//             label: spec.name,
+//           }))
+//         );
+//       })
+//       .catch((error) => {
+//         console.error("Error al cargar las especializaciones:", error);
+//       });
+//   }, []);
+
+//   // Buscar especializaciones existentes mientras el usuario escribe
+//   useEffect(() => {
+//     if (inputValue.length > 2) {
+//       fetch(`/api/specializations?name=${encodeURIComponent(inputValue)}`)
+//         .then((res) => res.json())
+//         .then((data) => {
+//           setSpecializations(
+//             data.map((spec: { id: string; name: string }) => ({
+//               value: spec.id,
+//               label: spec.name,
+//             }))
+//           );
+//           setShowSelect(data.length > 0);
+//         })
+//         .catch((error) => {
+//           console.error("Error al buscar especializaciones:", error);
+//         });
+//     } else {
+//       setShowSelect(false);
+//     }
+//   }, [inputValue]);
+//   // // Validar la existencia de la especialización por nombre
+//   // const validateSpecialization = async (specializationName: string) => {
+//   //   if (!specializationName || specializationName.trim().length === 0) {
+//   //     setSpecializationError("La especialización es obligatoria.");
+//   //     return false;
+//   //   }
+
+//   //   try {
+//   //     const response = await fetch(
+//   //       `/api/specializations?name=${encodeURIComponent(specializationName)}`
+//   //     );
+//   //     const data = await response.json();
+
+//   //     if (data.length === 0) {
+//   //       setSpecializationError("La especialización no existe.");
+//   //       return false;
+//   //     }
+
+//   //     setSpecializationError(null);
+//   //     return true;
+//   //   } catch (error) {
+//   //     console.error("Error al validar la especialización:", error);
+//   //     setSpecializationError("Error al verificar la especialización.");
+//   //     return false;
+//   //   }
+//   // };
+
+//   // Manejador de envío del formulario
+//   const onSubmit = async (data: RegisterFormValues) => {
+//     setIsLoading(true);
+//     setError(null);
+
+//     const isValidSpecialization = await validateSpecialization(
+//       data.specialization_name
+//     );
+
+//     if (!isValidSpecialization) {
+//       setIsLoading(false);
+//       return;
+//     }
+
+//     try {
+//       const response = await fetch("/api/auth/signup", {
+//         method: "POST",
+//         headers: { "Content-Type": "application/json" },
+//         body: JSON.stringify({
+//           ...data,
+//           full_name: `${data.first_name} ${data.last_name}`,
+//           birthdate: new Date(data.birthdate).toISOString(),
+//           type: "Student",
+//           status: "Active",
+//           emailVerified: false,
+//           specialization_name: data.specialization_name,
+//         }),
+//       });
+
+//       if (!response.ok) {
+//         const errorData = await response.json();
+//         throw new Error(errorData.error || "Error en el registro");
+//       }
+
+//       router.push("/auth/verify-email");
+//     } catch (error) {
+//       console.error("Error en registro:", error);
+//       setError(error instanceof Error ? error.message : "Error desconocido");
+//     } finally {
+//       setIsLoading(false);
+//     }
+//   };
+
+//   // Manejador de inicio de sesión con Google
+//   const handleGoogleSignIn = async () => {
+//     setIsLoading(true);
+//     setError(null);
+
+//     try {
+//       // Simulación de inicio de sesión con Google
+//       await new Promise((resolve) => setTimeout(resolve, 2000));
+//       router.push("/dashboard");
+//     } catch (error) {
+//       console.error("Error en inicio de sesión con Google:", error);
+//       setError(
+//         "Error al iniciar sesión con Google. Por favor, intente de nuevo."
+//       );
+//     } finally {
+//       setIsLoading(false);
+//     }
+//   };
+
+//   return (
+//     <div className="flex min-h-screen">
+//       {/* Sección del formulario */}
+//       <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md">
+//         <Card>
+//           <CardHeader>
+//             <CardTitle>Crear Nueva Cuenta</CardTitle>
+//           </CardHeader>
+//           <CardContent>
+//             <Tabs value={activeTab} onValueChange={setActiveTab}>
+//               <TabsList className="grid w-full grid-cols-2">
+//                 <TabsTrigger value="email">Email</TabsTrigger>
+//                 <TabsTrigger value="google">Google</TabsTrigger>
+//               </TabsList>
+
+//               {/* Registro con Email */}
+//               <TabsContent value="email">
+//                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+//                   {error && (
+//                     <div className="p-3 text-red-600 bg-red-100 rounded">
+//                       {error}
+//                     </div>
+//                   )}
+
+//                   <FormField
+//                     label="Primer Nombre"
+//                     id="first_name"
+//                     error={errors.first_name}
+//                     register={register("first_name")}
+//                   />
+//                   <FormField
+//                     label="Segundo Nombre"
+//                     id="last_name"
+//                     error={errors.last_name}
+//                     register={register("last_name")}
+//                   />
+//                   <FormField
+//                     label="Primer Apellido"
+//                     id="first_surname"
+//                     error={errors.first_surname}
+//                     register={register("first_surname")}
+//                   />
+//                   <FormField
+//                     label="Segundo Apellido (Opcional)"
+//                     id="second_surname"
+//                     error={errors.second_surname}
+//                     register={register("second_surname")}
+//                   />
+//                   <FormField
+//                     label="Cédula"
+//                     id="cedula"
+//                     error={errors.cedula}
+//                     register={register("cedula")}
+//                   />
+//                   <FormField
+//                     label="Correo Electrónico"
+//                     id="email"
+//                     type="email"
+//                     error={errors.email}
+//                     register={register("email")}
+//                   />
+//                   <FormField
+//                     label="Nombre de Usuario"
+//                     id="username"
+//                     error={errors.username}
+//                     register={register("username")}
+//                   />
+//                   <FormField
+//                     label="Contraseña"
+//                     type="password"
+//                     error={errors.password}
+//                     register={register("password")}
+//                   />
+//                   <FormField
+//                     label="Fecha de Nacimiento"
+//                     id="birthdate"
+//                     type="date"
+//                     error={errors.birthdate}
+//                     register={register("birthdate")}
+//                   />
+//                   <FormField
+//                     label="Dirección"
+//                     id="address"
+//                     error={errors.address}
+//                     register={register("address")}
+//                   />
+//                   <Controller
+//                     name="nationality"
+//                     control={control}
+//                     render={({ field }) => (
+//                       <SelectField
+//                         label="Nacionalidad"
+//                         options={[
+//                           { value: "V", label: "V" },
+//                           { value: "E", label: "E" },
+//                         ]}
+//                         field={field}
+//                         error={errors.nationality}
+//                         className="bg-white/5 border-white/20 text-white"
+//                       />
+//                     )}
+//                   />
+//                   <FormField label="Especialización">
+//                     <div className="mb-4">
+//                       <label
+//                         htmlFor="specialization"
+//                         className="block text-sm font-medium"
+//                       >
+//                         Especialización
+//                       </label>
+//                       <input
+//                         id="specialization"
+//                         {...register("specialization", {
+//                           required: "La especialización es requerida",
+//                         })}
+//                         value={inputValue}
+//                         onChange={(e) => {
+//                           setInputValue(e.target.value); // Actualizar el valor del input
+//                           setValue("specialization", e.target.value); // Actualizar el valor del formulario
+//                         }}
+//                         placeholder="Ingresa o selecciona una especialización"
+//                         className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+//                       />
+//                       {showSelect && (
+//                         <select
+//                           onChange={(e) => {
+//                             setValue("specialization", e.target.value); // Actualizar el ID de la especialización
+//                             setInputValue(
+//                               e.target.options[e.target.selectedIndex].text
+//                             ); // Actualizar el valor del input
+//                             setShowSelect(false); // Ocultar el select
+//                           }}
+//                           className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+//                         >
+//                           {specializations.map((spec) => (
+//                             <option key={spec.value} value={spec.value}>
+//                               {spec.label}
+//                             </option>
+//                           ))}
+//                         </select>
+//                       )}
+//                       {errors.specialization && (
+//                         <p className="text-red-500 text-sm">
+//                           {errors.specialization.message}
+//                         </p>
+//                       )}
+//                     </div>
+//                   </FormField>
+//                   <FormField
+//                     label="Pregunta Secreta"
+//                     id="question"
+//                     error={errors.question}
+//                     register={register("question")}
+//                   />
+//                   <FormField
+//                     label="Respuesta Secreta"
+//                     id="answer"
+//                     error={errors.answer}
+//                     register={register("answer")}
+//                   />
+
+//                   <Button type="submit" disabled={isLoading} className="w-full">
+//                     {isLoading ? (
+//                       <Loader2 className="animate-spin" />
+//                     ) : (
+//                       "Crear Cuenta"
+//                     )}
+//                   </Button>
+//                 </form>
+//               </TabsContent>
+
+//               {/* Registro con Google */}
+//               <TabsContent value="google">
+//                 <Button
+//                   onClick={handleGoogleSignIn}
+//                   disabled={isLoading}
+//                   className="w-full"
+//                 >
+//                   {isLoading ? (
+//                     <Loader2 className="animate-spin" />
+//                   ) : (
+//                     "Iniciar con Google"
+//                   )}
+//                 </Button>
+//               </TabsContent>
+//             </Tabs>
+
+//             <div className="mt-4 text-center">
+//               ¿Ya tienes una cuenta?{" "}
+//               <Link
+//                 href="/auth/login"
+//                 className="text-blue-600 hover:underline"
+//               >
+//                 Iniciar Sesión
+//               </Link>
+//             </div>
+//           </CardContent>
+//         </Card>
+//       </div>
+
+//       {/* Sección gráfica */}
+//       <div className="flex-1 bg-gray-100 flex items-center justify-center">
+//         <div className="text-center">
+//           <h1 className="text-3xl font-bold">
+//             Sistema de Gestión de Preparadurías Universitarias
+//           </h1>
+//           <p className="mt-4 text-gray-600">
+//             Optimiza la gestión de preparaduría con nuestra plataforma integrada
+//           </p>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// }

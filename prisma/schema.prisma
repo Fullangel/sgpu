@@ -57,11 +57,12 @@ model User {
   teacher              User?            @relation("TeacherPreparer", fields: [teacher_id], references: [id], onDelete: Cascade)
   preparers            User[]           @relation("TeacherPreparer")
   subjects             UserSubject[]    @relation("UserSubject")
+  materials            Material[]
+  subjectsAsTeacher    Subject[]        @relation("TeacherToSubject") // Materias donde el usuario es profesor
+  subjectsAsPreparer   Subject[]        @relation("PreparerToSubject") // Materias donde el usuario es preparador
 
-  subjectsAsTeacher  Subject[] @relation("TeacherToSubject") // Materias donde el usuario es profesor
-  subjectsAsPreparer Subject[] @relation("PreparerToSubject") // Materias donde el usuario es preparador
-
-  materials Material[]
+  specialization_id Int? // Clave foránea hacia Specialization (opcional)
+  specialization    Specialization? @relation("UserToSpecialization", fields: [specialization_id], references: [id])
 
   @@unique([email], map: "user_email_unique")
   @@map("user")
@@ -88,6 +89,9 @@ model Subject {
   createdAt   DateTime?     @default(now())
   updatedAt   DateTime?     @updatedAt
   users       UserSubject[] @relation("UserSubject") // Relación de muchos a muchos
+
+  specialization_id Int // Clave foránea hacia Specialization
+  specialization    Specialization @relation("SpecializationToSubject", fields: [specialization_id], references: [id])
 }
 
 model Material {
@@ -124,4 +128,16 @@ model UserSubject {
   subject    Subject @relation("UserSubject", fields: [subject_id], references: [id], map: "UserSubject_subject_fkey")
 
   @@id([user_id, subject_id])
+}
+
+model Specialization {
+  id          Int       @id @default(autoincrement())
+  name        String    @unique // Nombre de la especialización (e.g., "Ingeniería de Sistemas")
+  description String? // Descripción opcional de la especialización
+  createdAt   DateTime? @default(now())
+  updatedAt   DateTime? @updatedAt
+
+  // Relaciones
+  subjects Subject[] @relation("SpecializationToSubject") // Una especialización tiene muchas materias
+  users    User[]    @relation("UserToSpecialization") // Muchos usuarios pueden pertenecer a una especialización
 }
